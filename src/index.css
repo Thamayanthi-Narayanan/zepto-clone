@@ -12,12 +12,27 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Global box-sizing and overflow fix */
+html, body {
+  overflow-x: hidden; /* Revert to only horizontal hidden */
+}
+
+.no-scroll {
+  overflow: hidden !important; /* Re-enable important hidden */
+  height: 100vh !important; /* Force full height and prevent scrolling */
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 #root {
   margin: 0;
-  padding: 0;
+  padding: 0; /* Reset padding to 0 */
   width: 100%;
   top: 0;
-  padding-top: 90px; /* Default padding for fixed navbar */
+  /* padding-top: 90px; */ /* Removed as Categories now handles its own top padding */
 }
 a {
   font-weight: 500;
@@ -34,7 +49,7 @@ body {
   /* place-items: center; */
   align-items: flex-start; /* Align items to the top */
   justify-content: flex-start; /* Align items to the left */
-  min-width: 320px;
+  /* min-width: 320px; */
   min-height: 100vh;
 }
 
@@ -72,17 +87,5 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
-  }
-}
-
-@media (max-width: 768px) {
-  #root {
-    padding-top: 70px; /* Adjust padding for tablets */
-  }
-}
-
-@media (max-width: 480px) {
-  #root {
-    padding-top: 60px; /* Adjust padding for small phones */
   }
 }

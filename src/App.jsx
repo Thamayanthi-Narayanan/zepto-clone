@@ -4,6 +4,9 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Navbar from './components/Navbar/Navbar'
 import Categories from './components/Categories/Categories'
+import Banners from './components/Banners/Banners'
+import HeroSection from './components/HeroSection/HeroSection'
+import HowItWorks from './components/HowItWorks/HowItWorks'
 import Footer from './components/Footer/Footer'
 
 function App() {
@@ -13,7 +16,10 @@ function App() {
     <>
     <Navbar/>
     <Categories/>
-    {/* <Footer/> */}
+    <Banners/>
+    <HeroSection/>
+    <HowItWorks/>
+    <Footer/>
     </>
   )
 }

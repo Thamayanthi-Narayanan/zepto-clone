@@ -1,40 +1,47 @@
 /* Main container – pushes it below navbar and aligns left */
 .categories {
   width: 100%;
-  display: flex;
-  justify-content: flex-start; /* Changed from center to flex-start */
-  padding-top: 90px;
+  /* display: flex; Removed display: flex to allow child to overflow */
+  /* justify-content: flex-start; */ /* Removed as display: flex is removed */
+  padding-top: 90px; /* Re-applied for fixed navbar offset */
+  padding-bottom: 10px; /* Keep some bottom padding for separation */
+  /* overflow-x: auto; */ /* Removed: Scrolling handled by .categories-container */
+  /* white-space: nowrap; */ /* Removed: Handled by .categories-container */
+  /* scrollbar-width: none; */ /* Removed: Handled by .categories-container */
+  /* scroll-padding-inline: 25px; */ /* Removed: Handled by .categories-container */
 }
 
 /* Inner container – horizontal scrolling */
 .categories-container {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 10px 20px; /* Increased horizontal padding */
+  gap: 20px;
+  padding: 0 25px; /* Inner padding for content */
+  /* flex-wrap: wrap; */
+  box-sizing: border-box;
+  width: 100%; /* Changed from max-content */
   overflow-x: auto;
   white-space: nowrap;
-  scrollbar-width: none;       /* Firefox */
-  scroll-padding-inline: 20px; /* Adjusted scroll padding */
-  position: relative; /* Added for pseudo-element positioning */
+  scrollbar-width: none;
+  /* scroll-padding-inline: 25px; */ /* Removed */
 }
 
 /* Hide scrollbar */
-.categories-container::-webkit-scrollbar {
-  display: none;               /* Chrome/Safari */
+.categories-container::-webkit-scrollbar { /* Apply scrollbar hiding to the scrollable container */
+  display: none;               /* Chrome/Safari: Hide scrollbar */
 }
 
 /* Scroll indicator */
-.categories-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 40px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0), #ffffff 80%);
-  pointer-events: none; /* Allows interaction with elements beneath */
-}
+/* .categories-container::after { */
+  /* content: ''; */
+  /* position: absolute; */
+  /* top: 0; */
+  /* right: 0; */
+  /* width: 40px; */
+  /* height: 100%; */
+  /* background: linear-gradient(to right, rgba(255,255,255,0), #ffffff 80%); */
+  /* pointer-events: none; */
+/* } */
 
 /* Category item styling */
 .category-item {
@@ -43,40 +50,72 @@
   align-items: center;
   justify-content: center;
 
-  background: #ffffff;
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
+  background: transparent;
+  padding: 10px 0;
+  border-radius: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0; /* Prevent shrinking */
+  flex-shrink: 0;
+  position: relative;
+  min-width: 70px; /* Added min-width to prevent shrinking too much */
 }
 
 /* On hover */
 .category-item:hover {
-  background: plum;
-  transform: scale(1.05);
+  background: transparent;
+  transform: none;
+  color: #5a1e96;
+}
+
+/* Active category styling */
+.category-item.active {
+  color: #5a1e96;
+  font-weight: 600;
+}
+
+.category-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #5a1e96;
 }
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
+  .categories {
+    padding-top: 70px;
+  }
   .categories-container {
-    gap: 12px;
-    padding: 8px 10px;
+    gap: 15px;
+    padding: 0 20px;
+    /* scroll-padding-inline: 20px; */ /* Removed */
   }
 
   .category-item {
-    font-size: 13px;
-    padding: 6px 12px;
+    font-size: 14px;
+    padding: 8px 0;
+    min-width: 60px;
   }
 }
 
 @media (max-width: 480px) {
+  .categories {
+    padding-top: 60px;
+  }
+  .categories-container {
+    gap: 10px;
+    padding: 0 15px;
+    /* scroll-padding-inline: 15px; */ /* Removed */
+  }
   .category-item {
-    font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 10px;
+    font-size: 13px;
+    padding: 6px 0;
+    min-width: 50px;
   }
 }

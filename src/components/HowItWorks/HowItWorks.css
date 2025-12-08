@@ -1,0 +1,146 @@
+.how-it-works-section {
+  padding: 60px 20px;
+  text-align: center;
+  background-color: white;
+  font-family: Arial, sans-serif;
+}
+
+.how-it-works-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 40px;
+}
+
+.how-it-works-cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.how-it-works-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  flex: 1;
+  min-width: 280px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.how-it-works-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.how-it-works-image-wrapper {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0e6fa; /* Light purple background for images */
+  border-radius: 50%;
+}
+
+.how-it-works-image {
+  max-width: 70%;
+  max-height: 70%;
+  object-fit: contain;
+}
+
+.how-it-works-card-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #5a1e96; /* Purple color for titles */
+  margin-bottom: 15px;
+}
+
+.how-it-works-card-description {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .how-it-works-card {
+    max-width: 300px;
+    min-width: 250px;
+    padding: 25px;
+  }
+
+  .how-it-works-title {
+    font-size: 28px;
+  }
+
+  .how-it-works-card-title {
+    font-size: 20px;
+  }
+
+  .how-it-works-card-description {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .how-it-works-section {
+    padding: 40px 15px;
+  }
+
+  .how-it-works-cards-container {
+    gap: 20px;
+  }
+
+  .how-it-works-card {
+    flex: none;
+    width: 100%;
+    max-width: 400px; /* Limit width on smaller screens */
+  }
+
+  .how-it-works-title {
+    font-size: 26px;
+  }
+
+  .how-it-works-image-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .how-it-works-section {
+    padding: 30px 10px;
+  }
+
+  .how-it-works-title {
+    font-size: 22px;
+    margin-bottom: 30px;
+  }
+
+  .how-it-works-card-title {
+    font-size: 18px;
+  }
+
+  .how-it-works-card-description {
+    font-size: 14px;
+  }
+
+  .how-it-works-card {
+    padding: 20px;
+  }
+
+  .how-it-works-image-wrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+}

@@ -1,8 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Navbar.css";
 import { MagnifyingGlass, } from "@phosphor-icons/react"
+import LoginModal from "../LoginModal/LoginModal";
 
 export default function Navbar() {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const handleLoginClick = () => {
+    setIsLoginModalOpen(true);
+    document.body.classList.add('no-scroll'); // Add no-scroll class
+  };
+
+  const handleCloseModal = () => {
+    setIsLoginModalOpen(false);
+    document.body.classList.remove('no-scroll'); // Remove no-scroll class
+  };
+
   return (
     <nav className="navbar">
       
@@ -28,10 +41,10 @@ export default function Navbar() {
 
       {/* Right Section */}
       <div className="nav-right">
-        <button className="nav-login">Login</button>
+        <button className="nav-login" onClick={handleLoginClick}>Login</button>
         <button className="nav-cart">Cart</button>
       </div>
-
+      <LoginModal isOpen={isLoginModalOpen} onClose={handleCloseModal} />
     </nav>
   );
 }

@@ -33,8 +33,7 @@
   font-weight: 800;
   color: #5a1e96; /*LOGO COLOR*/
   font-family: "Baloo 2", cursive;
-  white-space: nowrap;
-  padding-left: 50px;
+  margin-right: 15px;
 }
 
 .nav-location {
@@ -44,8 +43,6 @@
   cursor: pointer;
   font-size: 16px;
   color: #333;
-  white-space: nowrap;
-  padding-left: 10px;
   font-weight: bold;
 }
 
@@ -74,7 +71,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  white-space: nowrap;
+  flex-wrap: wrap;
 }
 
 .nav-login,

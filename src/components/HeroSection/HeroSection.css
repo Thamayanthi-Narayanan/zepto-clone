@@ -1,0 +1,109 @@
+.hero-section {
+  background-color: #f7f7f7; /* Light background similar to other sections */
+  padding: 80px 80px;
+  text-align: left;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0;
+  text-align: left;
+}
+
+.hero-title {
+  font-size: 80px;
+  font-weight: 700;
+  color: #6a6a6a; /* Dark gray for prominence */
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 38px;
+  color: #6a6a6a; /* Dark gray for prominence */
+  margin-bottom: 10px;
+}
+
+.zepto-team {
+  color: #5a1e96; /* Purple accent for Zepto Team */
+  font-weight: 600;
+}
+
+.hero-fssai {
+  font-size: 24px;
+  color: #6a6a6a;
+  margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .hero-section {
+    padding: 60px 40px;
+    text-align: left;
+  }
+
+  .hero-content {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .hero-title {
+    font-size: 70px;
+  }
+
+  .hero-subtitle {
+    font-size: 30px;
+  }
+
+  .hero-fssai {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 50px 30px;
+    text-align: left;
+  }
+
+  .hero-content {
+    text-align: left;
+  }
+
+  .hero-title {
+    font-size: 50px;
+  }
+
+  .hero-subtitle {
+    font-size: 24px;
+  }
+
+  .hero-fssai {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 40px 20px;
+    text-align: left;
+  }
+
+  .hero-content {
+    text-align: left;
+  }
+
+  .hero-title {
+    font-size: 38px;
+  }
+
+  .hero-subtitle {
+    font-size: 20px;
+  }
+
+  .hero-fssai {
+    font-size: 16px;
+  }
+}
