@@ -7,14 +7,18 @@ export default function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleLoginClick = () => {
+    console.log("Login button clicked, setting isLoginModalOpen to true");
     setIsLoginModalOpen(true);
     document.body.classList.add('no-scroll'); // Add no-scroll class
   };
 
   const handleCloseModal = () => {
+    console.log("Closing modal, setting isLoginModalOpen to false");
     setIsLoginModalOpen(false);
     document.body.classList.remove('no-scroll'); // Remove no-scroll class
   };
+
+  console.log("Navbar rendering, isLoginModalOpen:", isLoginModalOpen);
 
   return (
     <nav className="navbar">

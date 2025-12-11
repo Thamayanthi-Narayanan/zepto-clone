@@ -1,10 +1,15 @@
 /* Main container – pushes it below navbar and aligns left */
 .categories {
   width: 100%;
-  /* display: flex; Removed display: flex to allow child to overflow */
-  /* justify-content: flex-start; */ /* Removed as display: flex is removed */
-  padding-top: 90px; /* Re-applied for fixed navbar offset */
+  display: flex; /* Ensure flex context */
+  justify-content: flex-start; /* Align content to the left */
+  align-items: center; /* Center vertically */
+  padding-top: 90px; /* Adjusted to clear 90px navbar */
   padding-bottom: 10px; /* Keep some bottom padding for separation */
+  z-index: 1; /* Lower z-index to appear below navbar */
+  position: relative; /* Needed for z-index to work */
+  /* min-height: 80px; */ /* Removed temporary min-height */
+  /* background-color: #f0f0f0; */ /* Removed temporary background */
   /* overflow-x: auto; */ /* Removed: Scrolling handled by .categories-container */
   /* white-space: nowrap; */ /* Removed: Handled by .categories-container */
   /* scrollbar-width: none; */ /* Removed: Handled by .categories-container */
@@ -13,16 +18,19 @@
 
 /* Inner container – horizontal scrolling */
 .categories-container {
-  display: flex;
+  display: flex; /* Ensure flex context */
   align-items: center;
   gap: 20px;
   padding: 0 25px; /* Inner padding for content */
   /* flex-wrap: wrap; */
   box-sizing: border-box;
-  width: 100%; /* Changed from max-content */
-  overflow-x: auto;
-  white-space: nowrap;
+  /* width: 100%; */ /* Removed width to allow content to define scrollable width */
+  height: auto; /* Ensure height is determined by content */
+  /* min-height: 50px; */ /* Removed temporary min-height */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  white-space: nowrap; /* Keep content in a single line */
   scrollbar-width: none;
+  /* background-color: #e0e0e0; */ /* Removed temporary background */
   /* scroll-padding-inline: 25px; */ /* Removed */
 }
 
@@ -50,7 +58,7 @@
   align-items: center;
   justify-content: center;
 
-  background: transparent;
+  background: transparent; /* Reverted background to transparent */
   padding: 10px 0;
   border-radius: 0;
   font-size: 16px;
@@ -60,7 +68,8 @@
   transition: all 0.2s ease;
   flex-shrink: 0;
   position: relative;
-  min-width: 70px; /* Added min-width to prevent shrinking too much */
+  min-width: 70px;
+  /* min-height: 50px; */ /* Removed temporary min-height */
 }
 
 /* On hover */
@@ -89,7 +98,7 @@
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .categories {
-    padding-top: 70px;
+    padding-top: 70px; /* Adjusted to clear 70px navbar */
   }
   .categories-container {
     gap: 15px;
@@ -106,7 +115,7 @@
 
 @media (max-width: 480px) {
   .categories {
-    padding-top: 60px;
+    padding-top: 60px; /* Adjusted to clear 60px navbar */
   }
   .categories-container {
     gap: 10px;

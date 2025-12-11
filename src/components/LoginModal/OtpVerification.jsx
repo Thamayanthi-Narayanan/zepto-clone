@@ -22,6 +22,13 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
     return () => clearInterval(countdown);
   }, []);
 
+  // Auto-focus on the first OTP input when the component mounts
+  useEffect(() => {
+    if (otpInputRefs.current[0]) {
+      otpInputRefs.current[0].focus();
+    }
+  }, []); // Empty dependency array ensures it runs only once on mount
+
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return;
 
@@ -29,9 +36,9 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
     newOtp[index] = element.value;
     setOtp(newOtp);
 
-    // Focus next input
-    if (element.nextSibling && element.value !== '') {
-      element.nextSibling.focus();
+    // Focus next input if a digit is entered and it's not the last input
+    if (element.nextSibling && element.value !== '' && index < otp.length - 1) {
+      otpInputRefs.current[index + 1].focus(); // Use ref for next input
     }
 
     // If all OTPs are entered, simulate verification
