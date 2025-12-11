@@ -1,0 +1,159 @@
+.otp-screen {
+  background-color: #5a1e96; /* Purple background */
+  color: white;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+.otp-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.otp-subtitle {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.otp-inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.otp-input {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 8px;
+  background-color: transparent;
+  color: white;
+  outline: none;
+}
+
+.otp-input:focus {
+  border-color: #ff3366; /* Pink focus */
+}
+
+.otp-timer {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.otp-resend-text {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.resend-otp-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #ffccff; /* Lighter purple link */
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.resend-otp-button:disabled {
+  color: #cccccc;
+  cursor: not-allowed;
+}
+
+.otp-success-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4CAF50; /* Green color for success message */
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .otp-screen {
+    padding: 30px;
+  }
+
+  .otp-title {
+    font-size: 28px;
+  }
+
+  .otp-subtitle {
+    font-size: 16px;
+  }
+
+  .otp-input {
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+  }
+
+  .otp-timer {
+    font-size: 20px;
+  }
+
+  .otp-resend-text,
+  .resend-otp-button {
+    font-size: 14px;
+  }
+
+  .otp-success-message {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .otp-screen {
+    padding: 20px;
+  }
+
+  .otp-title {
+    font-size: 24px;
+  }
+
+  .otp-subtitle {
+    font-size: 14px;
+  }
+
+  .otp-inputs {
+    gap: 8px;
+  }
+
+  .otp-input {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+
+  .otp-timer {
+    font-size: 18px;
+  }
+
+  .otp-resend-text,
+  .resend-otp-button {
+    font-size: 12px;
+  }
+
+  .otp-success-message {
+    font-size: 14px;
+  }
+}
