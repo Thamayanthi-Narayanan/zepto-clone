@@ -9,7 +9,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  overflow: hidden; /* Prevent internal scrolling of the overlay itself */
+  overflow: hidden; 
 }
 
 .modal-content {
@@ -17,8 +17,8 @@
   border-radius: 12px;
   overflow: hidden;
   display: flex;
-  width: 80%; /* Reduced width */
-  max-width: 750px; /* Reduced max-width */
+  width: 80%; 
+  max-width: 750px; 
   position: relative;
 }
 
@@ -35,20 +35,20 @@
 }
 
 .modal-left {
-  background-color: #5a1e96; /* Purple background */
+  background-color: #5a1e96; 
   flex: 1;
   padding: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-start; /* Align content to the left */
+  align-items: flex-start;
   color: white;
 }
 
 .modal-left-logo-text {
   font-size: 40px;
   font-weight: 800;
-  color: #ff3366; /* Zepto pink color */
+  color: #ff3366; 
   margin-bottom: 15px;
 }
 
@@ -105,7 +105,7 @@
 }
 
 .continue-button {
-  background-color: #ff3366; /* Pink button */
+  background-color: #ff3366; 
   color: white;
   padding: 10px 20px;
   border: none;
@@ -131,7 +131,7 @@
 }
 
 .privacy-policy-text a {
-  color: #ffccff; /* Lighter purple link */
+  color: #ffccff; 
   text-decoration: none;
 }
 
@@ -147,13 +147,13 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  background-color: #f7f7f7; /* Light background for right section */
+  background-color: #f7f7f7; 
 }
 
 .modal-right-image-placeholder {
   width: 100%;
-  height: 120px; /* Placeholder height, adjust as needed */
-  background-color: #e0e0e0; /* Placeholder background */
+  height: 120px; 
+  background-color: #e0e0e0; 
   margin-bottom: 15px;
   border-radius: 8px;
 }
@@ -183,11 +183,10 @@
   cursor: pointer;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .modal-content {
     flex-direction: column;
-    max-width: 400px; /* Further reduced max-width */
+    max-width: 400px; 
   }
 
   .modal-left {

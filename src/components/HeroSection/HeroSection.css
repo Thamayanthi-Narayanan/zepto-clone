@@ -1,5 +1,5 @@
 .hero-section {
-  background-color: #f7f7f7; /* Light background similar to other sections */
+  background-color: #f7f7f7; 
   padding: 80px 80px;
   text-align: left;
   font-family: Arial, sans-serif;
@@ -15,19 +15,19 @@
 .hero-title {
   font-size: 80px;
   font-weight: 700;
-  color: #6a6a6a; /* Dark gray for prominence */
+  color: #6a6a6a; 
   margin-bottom: 20px;
   line-height: 1.2;
 }
 
 .hero-subtitle {
   font-size: 38px;
-  color: #6a6a6a; /* Dark gray for prominence */
+  color: #6a6a6a; 
   margin-bottom: 10px;
 }
 
 .zepto-team {
-  color: #5a1e96; /* Purple accent for Zepto Team */
+  color: #5a1e96; 
   font-weight: 600;
 }
 
@@ -37,7 +37,6 @@
   margin-top: 20px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 992px) {
   .hero-section {
     padding: 60px 40px;

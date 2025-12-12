@@ -19,8 +19,8 @@
 .search-items p {
   font-size: 14px;
   line-height: 1.8;
-  white-space: normal; /* Ensure text wraps */
-  word-wrap: break-word; /* Break long words */
+  white-space: normal; 
+  word-wrap: break-word; 
 }
 
 .search-items p strong {
@@ -37,8 +37,8 @@
   font-size: 14px;
   margin-bottom: 10px;
   line-height: 1.5;
-  white-space: normal; /* Ensure text wraps */
-  word-wrap: break-word; /* Break long words */
+  white-space: normal; 
+  word-wrap: break-word; 
 }
 
 .footer-bottom {
@@ -58,7 +58,6 @@
 }
 
 .footer-logo img {
-  /* width: 100px; */ /* Adjust as needed */
   max-width: 100%;
   height: auto;
   margin-bottom: 10px;
@@ -67,7 +66,7 @@
 .social-icons i {
   font-size: 24px;
   margin-right: 15px;
-  color: #5a1e96; /* Example color, adjust to match screenshot */
+  color: #5a1e96; 
 }
 
 .footer-left p {
@@ -97,7 +96,6 @@
 
 .app-buttons button {
   display: block;
-  /* width: 150px; */ /* Adjust as needed */
   width: auto;
   max-width: 100%;
   padding: 10px;
@@ -109,7 +107,6 @@
   cursor: pointer;
 }
 
-/* Responsive adjustments */
 @media (max-width: 1024px) {
   .main-categories-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -150,14 +147,14 @@
   }
   .footer-section h3 {
     font-size: 16px;
-    text-align: center; /* Center align headings on smaller screens */
+    text-align: center; 
   }
   .search-items p,
   .category-column p,
   .footer-links-group p,
   .download-app p {
     font-size: 13px;
-    text-align: center; /* Center align text on smaller screens */
+    text-align: center; 
   }
   .social-icons i {
     font-size: 20px;
@@ -188,14 +185,14 @@
   }
   .footer-section h3 {
     font-size: 15px;
-    text-align: center; /* Center align headings on very small screens */
+    text-align: center; 
   }
   .search-items p,
   .category-column p,
   .footer-links-group p,
   .download-app p {
     font-size: 12px;
-    text-align: center; /* Center align text on very small screens */
+    text-align: center; 
   }
   .social-icons i {
     font-size: 18px;

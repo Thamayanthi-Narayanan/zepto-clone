@@ -16,8 +16,6 @@
   top: 0;
   left: 0;
   z-index: 1000;
-
-  /* Ensures it always spans full width */
   max-width: 100%;
 }
 
@@ -31,7 +29,7 @@
 .nav-logo-text {
   font-size: 36px;
   font-weight: 800;
-  color: #5a1e96; /*LOGO COLOR*/
+  color: #5a1e96;
   font-family: "Baloo 2", cursive;
   margin-right: 15px;
 }
@@ -116,7 +114,6 @@
   }
 }
 
-/* Shrinking area (481px–768px FIXED) */
 @media (max-width: 600px) {
 
   .nav-logo-text {
@@ -128,7 +125,7 @@
   }
 
   .nav-search {
-    max-width: 240px;   /* ← Reduced width instead of hiding */
+    max-width: 240px;   
     padding: 8px 12px;
     font-size: 12px;
   }
@@ -139,7 +136,6 @@
   }
 }
 
-/* Small Phones */
 @media (max-width: 480px) {
   .navbar {
     padding: 0 6px;
@@ -147,7 +143,6 @@
     justify-content: space-between;
   }
 
-  /* Move logo left + reduce size */
   .nav-logo-text {
     font-size: 16px;
     padding-left: 0;
@@ -158,21 +153,18 @@
     gap: 4px;
   }
 
-  /* Keep location visible, reduce text size */
   .nav-location {
     display: flex;
     font-size: 12px;
     white-space: nowrap;
   }
 
-  /* Shrink search box but keep visible */
   .nav-search {
     max-width: 140px;
     width: 100%;
     font-size: 12px;
   }
 
-  /* Keep login visible, reduce font size */
   .nav-login {
     display: flex; 
     font-size: 12px;

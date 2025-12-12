@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0e6fa; /* Light purple background for images */
+  background-color: #f0e6fa; 
   border-radius: 50%;
 }
 
@@ -60,7 +60,7 @@
 .how-it-works-card-title {
   font-size: 22px;
   font-weight: 600;
-  color: #5a1e96; /* Purple color for titles */
+  color: #5a1e96;
   margin-bottom: 15px;
 }
 
@@ -70,7 +70,6 @@
   line-height: 1.6;
 }
 
-/* Responsive adjustments */
 @media (max-width: 992px) {
   .how-it-works-card {
     max-width: 300px;
@@ -103,7 +102,7 @@
   .how-it-works-card {
     flex: none;
     width: 100%;
-    max-width: 400px; /* Limit width on smaller screens */
+    max-width: 400px; 
   }
 
   .how-it-works-title {

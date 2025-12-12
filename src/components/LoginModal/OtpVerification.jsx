@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './OtpVerification.css';
+import { BASE_API_URL } from "../../api/apiConfig"; 
 
 export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -7,6 +8,7 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
   const [resendEnabled, setResendEnabled] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const otpInputRefs = useRef([]);
+  const [error, setError] = useState(''); // New state for OTP verification errors
 
   useEffect(() => {
     const countdown = setInterval(() => {
@@ -22,35 +24,67 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
     return () => clearInterval(countdown);
   }, []);
 
-  // Auto-focus on the first OTP input when the component mounts
   useEffect(() => {
     if (otpInputRefs.current[0]) {
       otpInputRefs.current[0].focus();
     }
-  }, []); // Empty dependency array ensures it runs only once on mount
+  }, []); 
 
-  const handleOtpChange = (element, index) => {
+  const handleOtpChange = async (element, index) => { 
     if (isNaN(element.value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = element.value;
     setOtp(newOtp);
+    setError(''); 
 
-    // Focus next input if a digit is entered and it's not the last input
     if (element.nextSibling && element.value !== '' && index < otp.length - 1) {
       otpInputRefs.current[index + 1].focus(); // Use ref for next input
     }
 
-    // If all OTPs are entered, simulate verification
+    // If all OTPs are entered, call API to verify
     if (newOtp.every(digit => digit !== '')) {
       const enteredOtp = newOtp.join('');
-      if (enteredOtp === '123456') { // Static OTP for now
-        setShowSuccessMessage(true);
-        setTimeout(() => {
-          onVerified(); // Close modal and navigate to home
-        }, 1500); // Show success message for 1.5 seconds
-      } else {
-        alert('Incorrect OTP. Please try again.');
+      const VERIFY_OTP_URL = BASE_API_URL + "/auth/verifyOtp";
+
+      try {
+        const response = await fetch(VERIFY_OTP_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true", // Bypass ngrok warning
+          },
+          body: JSON.stringify({ phoneNumber: phoneNumber, otp: enteredOtp }),
+        });
+
+        if (!response.ok) {
+          console.error("Verify OTP API response not OK:", response.status, response.statusText);
+          let errorData = {};
+          try {
+            errorData = await response.json();
+          } catch (jsonError) {
+            console.error("Failed to parse verify OTP error response as JSON:", jsonError);
+            setError(`Verification failed: ${response.status} ${response.statusText}.`);
+            return;
+          }
+          setError(errorData.message || "OTP verification failed. Please try again.");
+          return;
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          setShowSuccessMessage(true); // Show success message
+          console.log("OTP verified successfully! Token:", result.data.token); // For testing
+          setTimeout(() => {
+            onVerified(); 
+          }, 1500); 
+        } else {
+          setError(result.message || "Invalid OTP. Please try again.");
+        }
+      } catch (err) {
+        console.error("Error verifying OTP:", err);
+        setError("Network error or server unavailable during OTP verification.");
       }
     }
   };
@@ -62,10 +96,9 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
   };
 
   const handleResendOtp = () => {
-    setTimer(17);
+    setTimer(30); 
     setResendEnabled(false);
     setOtp(new Array(6).fill(''));
-    // Simulate sending new OTP
     alert('New OTP sent!');
     // Restart timer
     const countdown = setInterval(() => {
@@ -106,6 +139,7 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
             />
           ))}
         </div>
+        {error && <p className="otp-error-message">{error}</p>} {/* Display error message */}
         {showSuccessMessage && (
           <p className="otp-success-message">OTP Verified Successfully!</p>
         )}
@@ -122,12 +156,10 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
         )}
       </div>
       <div className="modal-right">
-        <div className="modal-right-image-placeholder"></div> {/* Placeholder for image */}
+        <div className="modal-right-image-placeholder"></div> 
         <h2 className="modal-right-title">Order faster & easier everytime</h2>
         <p className="modal-right-subtitle-app">with the Zepto App</p>
         <div className="app-download-buttons">
-          {/* <img src={googlePlay} alt="Get it on Google Play" className="app-button" /> */}
-          {/* <img src={appStore} alt="Download on the App Store" className="app-button" /> */}
         </div>
       </div>
     </>

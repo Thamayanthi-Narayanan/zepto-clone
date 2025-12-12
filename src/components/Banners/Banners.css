@@ -15,15 +15,15 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   flex: 1;
   min-width: 300px;
-  max-width: 580px; /* Adjust based on image ratio */
+  max-width: 580px; 
 }
 
 .banner-card-1 {
-  background-color: #e6ffe6; /* Light green background */
+  background-color: #e6ffe6; 
 }
 
 .banner-card-2 {
-  background-color: #efe6ff; /* Light purple background */
+  background-color: #efe6ff; 
 }
 
 .banner-image-container {
@@ -41,10 +41,9 @@
   border-radius: 12px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 992px) {
   .banner-card {
-    flex-direction: column; /* Stack content vertically */
+    flex-direction: column; 
     text-align: center;
     max-width: 450px;
   }

@@ -53,11 +53,7 @@ const Footer = () => {
 
       <div className="footer-bottom">
         <div className="footer-left">
-          {/* <div className="footer-logo">
-            <img src="https://www.zeptonow.com/images/zepto-logo.svg" alt="Zepto Logo" />
-          </div> */}
           <div className="social-icons">
-            {/* Placeholder for social icons */}
             <i className="fab fa-instagram"></i>
             <i className="fab fa-twitter"></i>
             <i className="fab fa-facebook"></i>

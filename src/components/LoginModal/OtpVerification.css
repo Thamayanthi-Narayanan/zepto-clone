@@ -1,5 +1,5 @@
 .otp-screen {
-  background-color: #5a1e96; /* Purple background */
+  background-color: #5a1e96; 
   color: white;
   padding: 40px;
   display: flex;
@@ -51,7 +51,7 @@
 }
 
 .otp-input:focus {
-  border-color: #ff3366; /* Pink focus */
+  border-color: #ff3366; 
 }
 
 .otp-timer {
@@ -69,7 +69,7 @@
   background: none;
   border: none;
   font-size: 16px;
-  color: #ffccff; /* Lighter purple link */
+  color: #ffccff; 
   cursor: pointer;
   text-decoration: underline;
 }
@@ -82,7 +82,7 @@
 .otp-success-message {
   font-size: 18px;
   font-weight: 600;
-  color: #4CAF50; /* Green color for success message */
+  color: #4CAF50;
   margin-top: 15px;
   margin-bottom: 15px;
 }

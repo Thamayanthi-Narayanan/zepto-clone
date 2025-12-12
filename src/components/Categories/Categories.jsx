@@ -4,7 +4,7 @@ import { BASE_API_URL } from "../../api/apiConfig";
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
-  const API_ENDPOINT = "/api/metadata"; // Only the endpoint part
+  const API_ENDPOINT = "/api/metadata"; 
   const FULL_API_URL = BASE_API_URL + API_ENDPOINT;
 
   useEffect(() => {
@@ -22,11 +22,8 @@ export default function Categories() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Removed temporary logging of raw response text
-        const result = await response.json(); // Reverted to direct JSON parsing
+        const result = await response.json(); 
         if (result.success && result.data) {
-          // API data format is [{ "All": "All" }, ...]
-          // We need to extract the value from each object
           const extractedCategories = result.data.map(item => Object.values(item)[0]);
           setCategories(extractedCategories);
         } else {
@@ -38,7 +35,7 @@ export default function Categories() {
     };
 
     fetchCategories();
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []); 
 
   return (
     <div className="categories">

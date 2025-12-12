@@ -9,13 +9,13 @@ export default function Navbar() {
   const handleLoginClick = () => {
     console.log("Login button clicked, setting isLoginModalOpen to true");
     setIsLoginModalOpen(true);
-    document.body.classList.add('no-scroll'); // Add no-scroll class
+    document.body.classList.add('no-scroll'); 
   };
 
   const handleCloseModal = () => {
     console.log("Closing modal, setting isLoginModalOpen to false");
     setIsLoginModalOpen(false);
-    document.body.classList.remove('no-scroll'); // Remove no-scroll class
+    document.body.classList.remove('no-scroll'); 
   };
 
   console.log("Navbar rendering, isLoginModalOpen:", isLoginModalOpen);
@@ -29,8 +29,6 @@ export default function Navbar() {
 
         <div className="nav-location">
           <span className="location-label">Select Location</span>
-          {/* <MagnifyingGlass size={32} /> */}
-          {/* <span className="location-arrow">▼</span> */}
         </div>
       </div>
 
