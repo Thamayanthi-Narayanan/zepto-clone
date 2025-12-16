@@ -1,0 +1,242 @@
+.product-listing-section {
+  padding: 20px;
+  background-color: #f8f8f8;
+}
+
+.product-listing-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 15px;
+  padding: 15px 20px;
+  justify-items: center;
+}
+
+.product-card {
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.product-image-container {
+  width: calc(100% - 2px);
+  padding-top: calc(100% - 2px);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  background-color: white;
+}
+
+.product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0;
+}
+
+.add-button {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: white;
+  color: #f73859;
+  border: 1px solid #f73859;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.add-button:hover {
+  background-color: #f73859;
+  color: white;
+  border-color: #f73859;
+}
+
+.product-price-pill {
+  background-color: #008000;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  line-height: 1;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.product-details {
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: flex-start;
+}
+
+.product-price-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.mrp-price {
+  font-size: 12px;
+  color: #888;
+  text-decoration: line-through;
+}
+
+.discount-text {
+  font-size: 11px;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 3px;
+  min-height: 35px;
+  white-space: normal;
+  line-height: 1.2;
+  max-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-unit {
+  font-size: 12px;
+  color: #666;
+  margin-top: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .product-listing-container {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .product-listing-container {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  }
+  .product-image-container {
+    border-radius: 6px;
+  }
+  .add-button {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .product-price-pill {
+    font-size: 13px;
+    padding: 3px 7px;
+    border-radius: 4px;
+  }
+  .product-details {
+    padding: 4px 8px;
+  }
+  .mrp-price {
+    font-size: 11px;
+  }
+  .discount-text {
+    font-size: 10px;
+  }
+  .product-name {
+    font-size: 13px;
+    min-height: 30px;
+    max-height: 35px;
+  }
+  .product-unit {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-listing-container {
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+    gap: 10px;
+    padding: 10px 15px;
+  }
+  .product-image-container {
+    border-radius: 5px;
+  }
+  .add-button {
+    padding: 4px 8px;
+    font-size: 11px;
+    bottom: 6px;
+    right: 6px;
+  }
+  .product-price-pill {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .product-details {
+    padding: 3px 6px;
+  }
+  .mrp-price {
+    font-size: 10px;
+  }
+  .discount-text {
+    font-size: 9px;
+  }
+  .product-name {
+    font-size: 12px;
+    min-height: 25px;
+    max-height: 30px;
+  }
+  .product-unit {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-listing-container {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .product-image-container {
+    border-radius: 4px;
+  }
+  .add-button {
+    padding: 3px 6px;
+    font-size: 10px;
+    bottom: 4px;
+    right: 4px;
+  }
+  .product-price-pill {
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 2px;
+  }
+  .product-details {
+    padding: 2px 4px;
+  }
+  .mrp-price {
+    font-size: 8px;
+  }
+  .discount-text {
+    font-size: 7px;
+  }
+  .product-name {
+    font-size: 11px;
+    min-height: 20px;
+    max-height: 25px;
+  }
+  .product-unit {
+    font-size: 9px;
+  }
+}

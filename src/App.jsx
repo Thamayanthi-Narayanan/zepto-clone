@@ -5,6 +5,7 @@ import './App.css'
 import Navbar from './components/Navbar/Navbar'
 import Categories from './components/Categories/Categories'
 import Banners from './components/Banners/Banners'
+import ProductListing from './components/ProductListing/ProductListing' // New import
 import HeroSection from './components/HeroSection/HeroSection'
 import HowItWorks from './components/HowItWorks/HowItWorks'
 import Footer from './components/Footer/Footer'
@@ -17,6 +18,7 @@ function App() {
     <Navbar/>
     <Categories/>
     <Banners/>
+    <ProductListing/> {/* New component */}
     <HeroSection/>
     <HowItWorks/>
     <Footer/>
