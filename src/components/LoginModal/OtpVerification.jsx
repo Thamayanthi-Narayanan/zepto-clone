@@ -74,8 +74,14 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
         const result = await response.json();
 
         if (result.success) {
+          // Store phone number in localStorage
+          localStorage.setItem('userPhoneNumber', phoneNumber);
+
+          const userToken = result.data?.token || 'mock_jwt_token_for_user';
+          localStorage.setItem('authToken', userToken);
+
           setShowSuccessMessage(true); // Show success message
-          console.log("OTP verified successfully! Token:", result.data.token); // For testing
+          console.log("OTP verified successfully! Token:", userToken); 
           setTimeout(() => {
             onVerified(); 
           }, 1500); 
