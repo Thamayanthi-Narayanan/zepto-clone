@@ -1,160 +1,96 @@
-import React from 'react'; // Removed useState and useEffect
+import React, { useState, useEffect } from 'react';
 import './ProductListing.css';
-// import { BASE_API_URL } from "../../api/apiConfig"; // Removed BASE_API_URL import
-
-// Placeholder images for now since thumbnailUrl returns null
-// import milkyMistPaneer from '../../assets/milky-mist-paneer.png';
-// import freshOnion from '../../assets/fresh-onion.png';
-// import nandiniFreshTonedMilk from '../../assets/nandini-fresh-toned-milk.png';
-// import corianderLeaves from '../../assets/coriander-leaves.png';
-// import bananaRobusta from '../../assets/banana-robusta.png';
-// import nandiniThickCurdPouch from '../../assets/nandini-thick-curd-pouch.png';
-// import tomatoLocal from '../../assets/tomato-local.png';
-// import tenderCoconut from '../../assets/tender-coconut.png';
-
-
-const staticProducts = [
-  {
-    id: 1,
-    productName: "Milky Mist Paneer",
-    mrp: 325.0,
-    price: 199.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.5,
-    unitType: "pack",
-    unitValue: "500 g",
-    discountPercentage: 38.77,
-    totalReviews: 320,
-    discountAmount: 126
-  },
-  {
-    id: 2,
-    productName: "Fresh Onion",
-    mrp: 73.0,
-    price: 38.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.4,
-    unitType: "pack",
-    unitValue: "900 - 1000 gm",
-    discountPercentage: 47.94,
-    totalReviews: 110,
-    discountAmount: 35
-  },
-  {
-    id: 3,
-    productName: "Nandini Fresh Toned Fresh Milk (Pouch Blue)",
-    mrp: 0.0, // Assuming no MRP for this item as per image/API. Will update if needed.
-    price: 24.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.6,
-    unitType: "pack",
-    unitValue: "500 ml",
-    discountPercentage: 0.0,
-    totalReviews: 210,
-    discountAmount: 0
-  },
-  {
-    id: 4,
-    productName: "Coriander leaves",
-    mrp: 11.0,
-    price: 7.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.4,
-    unitType: "pack",
-    unitValue: "100 g",
-    discountPercentage: 36.36,
-    totalReviews: 75,
-    discountAmount: 4
-  },
-  {
-    id: 5,
-    productName: "Banana Robusta",
-    mrp: 37.0,
-    price: 23.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.5,
-    unitType: "pcs",
-    unitValue: "4",
-    discountPercentage: 37.84,
-    totalReviews: 180,
-    discountAmount: 14
-  },
-  {
-    id: 6,
-    productName: "Nandini Thick Curd Pouch",
-    mrp: 0.0, // Assuming no MRP for this item as per image/API. Will update if needed.
-    price: 28.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.5,
-    unitType: "pack",
-    unitValue: "500 g",
-    discountPercentage: 0.0,
-    totalReviews: 180,
-    discountAmount: 0
-  },
-  {
-    id: 7,
-    productName: "Tomato Local",
-    mrp: 59.0,
-    price: 28.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.5,
-    unitType: "g",
-    unitValue: "500",
-    discountPercentage: 52.54,
-    totalReviews: 180,
-    discountAmount: 31
-  },
-  {
-    id: 8,
-    productName: "Tender Coconut",
-    mrp: 68.0,
-    price: 37.0,
-    thumbnailUrl: null, // Set to null
-    rating: 4.5,
-    unitType: "pc",
-    unitValue: "1",
-    discountPercentage: 45.59,
-    totalReviews: 180,
-    discountAmount: 31
-  },
-];
-
+import { BASE_API_URL } from "../../api/apiConfig";
 
 export default function ProductListing() {
-  // Removed state and useEffect hooks for API fetching
-  // const [products, setProducts] = useState([]);
-  // const [error, setError] = useState(null);
-  // const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Removed useEffect hook
+  const API_ENDPOINT = "/api/products/all";
+  const FULL_API_URL = BASE_API_URL + API_ENDPOINT;
 
-  // Removed conditional rendering for loading/error
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(FULL_API_URL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.success && result.data) {
+          setProducts(result.data);
+        } else {
+          console.error("API call successful but data not as expected:", result);
+          setError("Failed to fetch products: Data format incorrect.");
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Failed to fetch products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return <section className="product-listing-section">Loading products...</section>;
+  }
+
+  if (error) {
+    return <section className="product-listing-section">Error: {error}</section>;
+  }
 
   return (
     <section className="product-listing-section">
       <div className="product-listing-container">
-        {staticProducts.map((product) => (
+        {products.map((product) => {
+          const hasValidPrices =
+            typeof product.mrp === "number" &&
+            typeof product.price === "number" &&
+            product.mrp > product.price;
+          const discountAmount = hasValidPrices
+            ? Math.round(product.mrp - product.price)
+            : null;
+
+          return (
           <div className="product-card" key={product.id}>
             <div className="product-image-container">
               <img src={product.thumbnailUrl || 'placeholder.png'} alt={product.productName} className="product-image" />
               <button className="add-button">ADD</button>
             </div>
             <div className="product-details">
-              <div className="product-price-pill">
-                <span>₹{product.price}</span>
-              </div>
-              <div className="product-price-info">
+              <div className="price-and-mrp">
+                <div className="product-price-pill">
+                  <span>₹{product.price}</span>
+                </div>
                 {product.mrp > 0 && <span className="mrp-price">₹{product.mrp}</span>}
               </div>
-              {product.discountAmount > 0 && (
-                <p className="discount-text">₹{product.discountAmount} OFF</p>
+              {discountAmount && discountAmount > 0 && (
+                <p className="discount-amount-text">₹{discountAmount} OFF</p>
               )}
               <h3 className="product-name">{product.productName}</h3>
-              <p className="product-unit">{product.unitValue}</p> {/* Reverted to unitValue */}
+              <p className="product-unit">{product.unitValue || product.unitType}</p>
+              {product.rating && (
+                <div className="product-rating-reviews">
+                  <span className="star-icon"></span>
+                  <span className="product-rating-value">{product.rating}</span>
+                  <span className="product-total-reviews">({product.totalReviews})</span>
+                </div>
+              )}
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </section>
   );

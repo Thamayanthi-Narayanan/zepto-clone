@@ -75,31 +75,72 @@
 }
 
 .product-details {
-  padding: 5px 10px;
+  padding: 0 10px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   align-items: flex-start;
+  padding-bottom: 10px;
 }
 
-.product-price-info {
+.price-and-mrp {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-end; /* Align items to the bottom */
   margin-bottom: 3px;
+}
+
+.product-price-pill {
+  background-color: #008000;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  line-height: 1;
+  display: inline-block;
+  margin-right: 6px;
 }
 
 .mrp-price {
   font-size: 12px;
   color: #888;
   text-decoration: line-through;
+  /* Removed margin-bottom */
 }
 
-.discount-text {
+.discount-amount-text {
+  color: #008000;
   font-size: 11px;
-  color: #888;
   font-weight: 600;
   margin-bottom: 5px;
+}
+
+.product-rating-reviews {
+  display: flex;
+  align-items: center;
+  background-color: #d4edda; /* Light green background */
+  color: #155724; /* Dark green text */
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 3px;
+  margin-bottom: 5px;
+}
+
+.product-rating-reviews .star-icon::before {
+  content: "\2605"; /* Unicode star character */
+  margin-right: 3px;
+  font-size: 10px;
+}
+
+.product-rating-value {
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.product-total-reviews {
+  font-size: 11px;
+  margin-left: 3px;
 }
 
 .product-name {
@@ -107,18 +148,14 @@
   font-weight: 600;
   color: #333;
   margin-bottom: 3px;
-  min-height: 35px;
   white-space: normal;
   line-height: 1.2;
-  max-height: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .product-unit {
   font-size: 12px;
   color: #666;
-  margin-top: auto;
+  margin-bottom: 5px; /* Added margin for spacing */
 }
 
 /* Responsive Adjustments */
@@ -155,8 +192,6 @@
   }
   .product-name {
     font-size: 13px;
-    min-height: 30px;
-    max-height: 35px;
   }
   .product-unit {
     font-size: 11px;
@@ -194,8 +229,6 @@
   }
   .product-name {
     font-size: 12px;
-    min-height: 25px;
-    max-height: 30px;
   }
   .product-unit {
     font-size: 10px;
@@ -233,8 +266,6 @@
   }
   .product-name {
     font-size: 11px;
-    min-height: 20px;
-    max-height: 25px;
   }
   .product-unit {
     font-size: 9px;
