@@ -18,7 +18,8 @@ html, body {
   overflow-x: hidden; /* Revert to only horizontal hidden */
 }
 
-.no-scroll {
+html.no-scroll,
+body.no-scroll {
   overflow: hidden !important; /* Re-enable important hidden */
   height: 100vh !important; /* Force full height and prevent scrolling */
 }
