@@ -122,6 +122,11 @@
   background-color: #e6004c;
 }
 
+.continue-button:focus,
+.continue-button:active {
+  outline: none;
+}
+
 .privacy-policy-text {
   font-size: 13px;
   color: white;

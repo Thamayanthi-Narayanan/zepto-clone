@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ProductListing.css';
 import { BASE_API_URL } from "../../api/apiConfig";
+import { useCart } from '../../context/CartContext';
+import product1 from '../../assets/product1.png';
+import product2 from '../../assets/product2.png';
+import product3 from '../../assets/product3.png';
+import product4 from '../../assets/product4.png';
+import product5 from '../../assets/product5.png';
 
 export default function ProductListing() {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -51,10 +60,13 @@ export default function ProductListing() {
     return <section className="product-listing-section">Error: {error}</section>;
   }
 
+  // Array of product images
+  const productImages = [product1, product2, product3, product4, product5];
+
   return (
     <section className="product-listing-section">
       <div className="product-listing-container">
-        {products.map((product) => {
+        {products.map((product, index) => {
           const hasValidPrices =
             typeof product.mrp === "number" &&
             typeof product.price === "number" &&
@@ -63,11 +75,14 @@ export default function ProductListing() {
             ? Math.round(product.mrp - product.price)
             : null;
 
+          // Get image based on product index (cycle through if more than 5 products)
+          const productImage = productImages[index % productImages.length];
+
           return (
-          <div className="product-card" key={product.id}>
+          <div className="product-card" key={product.id} onClick={() => navigate(`/product/${product.id}`)}>
             <div className="product-image-container">
-              <img src={product.thumbnailUrl || 'placeholder.png'} alt={product.productName} className="product-image" />
-              <button className="add-button">ADD</button>
+              <img src={productImage} alt={product.productName} className="product-image" />
+              <button className="add-button" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>ADD</button>
             </div>
             <div className="product-details">
               <div className="price-and-mrp">

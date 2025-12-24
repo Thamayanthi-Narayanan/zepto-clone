@@ -82,6 +82,13 @@
   color: #333;
 }
 
+.nav-login:focus,
+.nav-login:active,
+.nav-cart:focus,
+.nav-cart:active {
+  outline: none;
+}
+
 .nav-cart {
   border-left: 1px solid #ccc;
   padding-left: 10px;

@@ -1,41 +1,36 @@
 import React from "react";
 import "./CartDrawer.css";
+import { useCart } from '../../context/CartContext';
 
-const mockCartItems = [
-  {
-    id: 1,
-    name: "Surf Excel Matic Top Load Detergent Powder",
-    unit: "1 pc (1 L)",
-    price: 192,
-    mrp: 225,
-    qty: 1,
-    imageUrl:
-      "https://images.pexels.com/photos/7282400/pexels-photo-7282400.jpeg?auto=compress&cs=tinysrgb&w=200",
-  },
-  {
-    id: 2,
-    name: "Surf Excel Matic Front Load Detergent Powder",
-    unit: "1 pack (5 L)",
-    price: 699,
-    mrp: 858,
-    qty: 1,
-    imageUrl:
-      "https://images.pexels.com/photos/7282278/pexels-photo-7282278.jpeg?auto=compress&cs=tinysrgb&w=200",
-  },
-  {
-    id: 3,
-    name: "Surf Excel Easy Wash Detergent Powder",
-    unit: "1 pack (1.5 kg)",
-    price: 198,
-    mrp: 235,
-    qty: 1,
-    imageUrl:
-      "https://images.pexels.com/photos/7282411/pexels-photo-7282411.jpeg?auto=compress&cs=tinysrgb&w=200",
-  },
-];
+export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
+  const { cartItems, updateQuantity, calculateTotals } = useCart();
+  const totals = calculateTotals();
 
-export default function CartDrawer({ isOpen, onClose }) {
   if (!isOpen) return null;
+
+  // Show empty state if cart is empty
+  if (cartItems.length === 0) {
+    return (
+      <>
+        <div className="cart-overlay" onClick={onClose} />
+        <aside className="cart-drawer">
+          <header className="cart-header">
+            <button className="cart-back-button" onClick={onClose}>
+              ←
+            </button>
+            <span className="cart-title">Cart</span>
+          </header>
+          <div className="cart-empty-state">
+            <div className="cart-empty-icon" />
+            <p className="cart-empty-text">Your cart is empty</p>
+            <button className="cart-browse-button" onClick={onClose}>
+              Browse Products
+            </button>
+          </div>
+        </aside>
+      </>
+    );
+  }
 
   return (
     <>
@@ -51,7 +46,7 @@ export default function CartDrawer({ isOpen, onClose }) {
         {/* Savings banner */}
         <div className="cart-savings-banner">
           <span className="cart-savings-text">
-            Yay! You saved <strong>₹269</strong> on this order
+            Yay! You saved <strong>₹{Math.round(totals.totalSavingsOnOrder)}</strong> on this order
           </span>
         </div>
 
@@ -78,32 +73,36 @@ export default function CartDrawer({ isOpen, onClose }) {
 
         {/* Items list */}
         <div className="cart-items-list">
-          {mockCartItems.map((item) => (
-            <div className="cart-item" key={item.id}>
-              <div className="cart-item-left">
-                <img
-                  src={item.imageUrl}
-                  alt={item.name}
-                  className="cart-item-image"
-                />
-              </div>
-              <div className="cart-item-middle">
-                <div className="cart-item-name">{item.name}</div>
-                <div className="cart-item-unit">{item.unit}</div>
-              </div>
-              <div className="cart-item-right">
-                <div className="cart-item-top-row">
-                  <div className="cart-item-qty">
-                    <button className="cart-qty-btn">−</button>
-                    <span className="cart-qty-value">{item.qty}</span>
-                    <button className="cart-qty-btn">+</button>
-                  </div>
-                  <div className="cart-item-price">₹{item.price}</div>
+          {cartItems.map((item) => {
+            const itemTotalPrice = item.price * item.qty;
+            const itemTotalMRP = item.mrp * item.qty;
+            return (
+              <div className="cart-item" key={item.id}>
+                <div className="cart-item-left">
+                  <img
+                    src={item.thumbnailUrl || 'placeholder.png'}
+                    alt={item.productName}
+                    className="cart-item-image"
+                  />
                 </div>
-                <div className="cart-item-mrp">₹{item.mrp}</div>
+                <div className="cart-item-middle">
+                  <div className="cart-item-name">{item.productName}</div>
+                  <div className="cart-item-unit">{item.unitValue || item.unitType}</div>
+                </div>
+                <div className="cart-item-right">
+                  <div className="cart-item-top-row">
+                    <div className="cart-item-qty">
+                      <button className="cart-qty-btn" onClick={() => updateQuantity(item.id, item.qty - 1)}>−</button>
+                      <span className="cart-qty-value">{item.qty}</span>
+                      <button className="cart-qty-btn" onClick={() => updateQuantity(item.id, item.qty + 1)}>+</button>
+                    </div>
+                    <div className="cart-item-price">₹{itemTotalPrice}</div>
+                  </div>
+                  <div className="cart-item-mrp">₹{itemTotalMRP}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Missed something row just below items */}
@@ -133,29 +132,29 @@ export default function CartDrawer({ isOpen, onClose }) {
           <div className="cart-bill-row">
             <span className="cart-bill-label">Item Total</span>
             <span className="cart-bill-value">
-              <span className="cart-bill-strike">₹1318</span>
-              <span className="cart-bill-main">₹1121</span>
+              <span className="cart-bill-strike">₹{Math.round(totals.itemTotalMRP)}</span>
+              <span className="cart-bill-main">₹{Math.round(totals.itemTotal)}</span>
             </span>
           </div>
           <div className="cart-bill-row">
             <span className="cart-bill-label">Handling Fee</span>
             <span className="cart-bill-value">
-              <span className="cart-bill-strike">₹10</span>
+              <span className="cart-bill-strike">₹{totals.handlingFeeMRP}</span>
               <span className="cart-bill-free">FREE</span>
             </span>
           </div>
           <div className="cart-bill-row">
             <span className="cart-bill-label">Delivery Fee</span>
             <span className="cart-bill-value">
-              <span className="cart-bill-strike">₹30</span>
+              <span className="cart-bill-strike">₹{totals.deliveryFeeMRP}</span>
               <span className="cart-bill-free">FREE</span>
             </span>
           </div>
           <div className="cart-bill-total-row">
             <span className="cart-bill-total-label">To Pay</span>
             <span className="cart-bill-total-value">
-              <span className="cart-bill-strike-light">₹1358</span>
-              <span className="cart-bill-main">₹1121</span>
+              <span className="cart-bill-strike-light">₹{Math.round(totals.totalMRP)}</span>
+              <span className="cart-bill-main">₹{Math.round(totals.totalToPay)}</span>
             </span>
           </div>
         </div>
@@ -165,7 +164,7 @@ export default function CartDrawer({ isOpen, onClose }) {
           <div className="cart-savings-left">
             <div className="cart-savings-title">Savings on this order</div>
           </div>
-          <div className="cart-savings-badge">₹237</div>
+          <div className="cart-savings-badge">₹{Math.round(totals.totalSavingsOnOrder)}</div>
         </div>
 
         {/* Savings breakdown details */}
@@ -175,21 +174,21 @@ export default function CartDrawer({ isOpen, onClose }) {
               <div className="cart-savings-detail-icon">%</div>
               <div className="cart-savings-detail-label">Discount on MRP</div>
             </div>
-            <div className="cart-savings-detail-amount">₹197</div>
+            <div className="cart-savings-detail-amount">₹{Math.round(totals.discountOnMRP)}</div>
           </div>
           <div className="cart-savings-detail-row">
             <div className="cart-savings-detail-left">
               <div className="cart-savings-detail-icon">Z</div>
               <div className="cart-savings-detail-label">FREE delivery savings</div>
             </div>
-            <div className="cart-savings-detail-amount">₹30</div>
+            <div className="cart-savings-detail-amount">₹{totals.freeDeliverySavings}</div>
           </div>
           <div className="cart-savings-detail-row cart-savings-detail-row-last">
             <div className="cart-savings-detail-left">
               <div className="cart-savings-detail-icon">₹</div>
               <div className="cart-savings-detail-label">Savings on Handling fee</div>
             </div>
-            <div className="cart-savings-detail-amount">₹10</div>
+            <div className="cart-savings-detail-amount">₹{totals.savingsOnHandlingFee}</div>
           </div>
         </div>
 
@@ -237,7 +236,12 @@ export default function CartDrawer({ isOpen, onClose }) {
 
         {/* Bottom proceed button */}
         <div className="cart-bottom-section">
-          <button className="cart-proceed-btn">Add Address to proceed</button>
+          <button 
+            className="cart-proceed-btn"
+            onClick={onOpenAddressModal}
+          >
+            Add Address to proceed
+          </button>
         </div>
       </aside>
     </>

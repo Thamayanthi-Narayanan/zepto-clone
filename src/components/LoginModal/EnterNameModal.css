@@ -1,0 +1,159 @@
+.enter-name-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.enter-name-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 32px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enter-name-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.enter-name-close:hover {
+  background-color: #f0f0f0;
+}
+
+.enter-name-close:focus,
+.enter-name-close:active {
+  outline: none;
+}
+
+.enter-name-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.enter-name-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin: 0;
+}
+
+.enter-name-input-container {
+  width: 100%;
+  background-color: white;
+  color: white;
+}
+
+.enter-name-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.enter-name-input:focus {
+  border-color: #7c3aed;
+}
+
+.enter-name-input::placeholder {
+  color: #999;
+}
+
+.enter-name-error {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.enter-name-button {
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+}
+
+.enter-name-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+}
+
+.enter-name-button:active {
+  transform: translateY(0);
+}
+
+.enter-name-button:focus,
+.enter-name-button:active {
+  outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .enter-name-modal {
+    padding: 32px 24px;
+    max-width: 90%;
+  }
+
+  .enter-name-title {
+    font-size: 20px;
+  }
+
+  .enter-name-input {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+
+  .enter-name-button {
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+}
+

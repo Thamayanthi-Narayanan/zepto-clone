@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import './LoginModal.css';
 import OtpVerification from './OtpVerification';
-import { BASE_API_URL } from "../../api/apiConfig"; 
+import EnterNameModal from './EnterNameModal';
+import { BASE_API_URL } from "../../api/apiConfig"; // Import BASE_API_URL
+// Placeholder imports for images - remember to add these assets
+/* import zeptoLogo from '../../assets/zepto-logo.svg'; */ 
+/* import googlePlay from '../../assets/google-play.svg'; */
+/* import appStore from '../../assets/app-store.svg'; */
+// Placeholder for the image above "Order faster & easier everytime"
+/* import orderFasterImage from '../../assets/order-faster-image.svg'; */
 
 export default function LoginModal({ isOpen, onClose }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [showOtpScreen, setShowOtpScreen] = useState(false);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [pendingPhoneNumber, setPendingPhoneNumber] = useState(''); // Store phone for auto-fill after name entry
 
   // Reset OTP screen state when modal opens
   useEffect(() => {
     if (isOpen) {
       setShowOtpScreen(false);
-      setPhoneNumber('');
+      setShowNameModal(false);
+      // Check if we have a pending phone number (from name entry flow)
+      const storedPhone = localStorage.getItem('pendingPhoneNumber');
+      if (storedPhone) {
+        setPhoneNumber(storedPhone);
+        localStorage.removeItem('pendingPhoneNumber');
+      } else {
+        setPhoneNumber('');
+      }
       setError('');
     }
   }, [isOpen]);
@@ -29,10 +46,10 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  const handleContinue = async () => { 
+  const handleContinue = async () => { // Made async to handle fetch
     if (phoneNumber.length === 10) {
-      setError(''); 
-      const SEND_OTP_URL = BASE_API_URL + "/auth/sendOtp"; 
+      setError(''); // Clear previous errors
+      const SEND_OTP_URL = BASE_API_URL + "/auth/sendOtp"; // Updated endpoint
 
       try {
         const response = await fetch(SEND_OTP_URL, {
@@ -42,7 +59,6 @@ export default function LoginModal({ isOpen, onClose }) {
             "ngrok-skip-browser-warning": "true",
           },
           body: JSON.stringify({ phoneNumber: phoneNumber }),
-          
         });
 
         if (!response.ok) {
@@ -61,7 +77,7 @@ export default function LoginModal({ isOpen, onClose }) {
         const result = await response.json();
 
         if (result.success) {
-          console.log("OTP sent successfully:", result.data.otp); 
+          console.log("OTP sent successfully:", result.data.otp); // For testing, remove in prod
           setShowOtpScreen(true); // Transition to OTP screen
         } else {
           setError(result.message || "Failed to send OTP. Please try again.");
@@ -76,29 +92,83 @@ export default function LoginModal({ isOpen, onClose }) {
   };
 
   const handleOtpVerified = () => {
-    onClose(); // Close modal after OTP is verified
-    // In a real application, you would redirect to the home page here
+    // User is logged in - close modal and navigate to home
+    onClose(); 
+    // Trigger a page reload or state update to show Profile instead of Login
+    window.dispatchEvent(new Event('userLoggedIn'));
+  };
+
+  const handleNewUser = () => {
+    console.log("handleNewUser called - showing name modal");
+    console.log("Current state - showOtpScreen:", showOtpScreen, "showNameModal:", showNameModal);
+    console.log("Current phoneNumber:", phoneNumber);
+    
+    // Store phone number temporarily for auto-fill after name entry
+    const phoneToStore = phoneNumber || localStorage.getItem('pendingPhoneNumber');
+    setPendingPhoneNumber(phoneToStore);
+    localStorage.setItem('pendingPhoneNumber', phoneToStore);
+    
+    // Update both states together
+    setShowOtpScreen(false);
+    setShowNameModal(true);
+    
+    console.log("State updated - showNameModal should be true now");
+    
+    // Force a re-render check
+    setTimeout(() => {
+      console.log("After state update - showNameModal should be:", true);
+    }, 100);
+  };
+
+  const handleNameSubmitted = (name) => {
+    // After name is submitted, go back to phone screen with auto-filled number
+    setShowNameModal(false);
+    // Use pendingPhoneNumber or the stored phone number
+    const phoneToUse = pendingPhoneNumber || phoneNumber || localStorage.getItem('pendingPhoneNumber');
+    if (phoneToUse) {
+      setPhoneNumber(phoneToUse);
+      // User needs to click Continue button to send OTP
+      // Just return to phone input screen with auto-filled number
+    }
   };
 
   const handleBackToPhoneInput = () => {
     setShowOtpScreen(false);
-    setPhoneNumber(''); // Clear phone number when going back
+    // Don't clear phone number if we're returning from name entry
+    if (!pendingPhoneNumber && !localStorage.getItem('pendingPhoneNumber')) {
+      setPhoneNumber('');
+    }
     setError('');
   };
 
   if (!isOpen) return null;
 
+  // Debug: Log current state
+  console.log("LoginModal render - showNameModal:", showNameModal, "showOtpScreen:", showOtpScreen, "isOpen:", isOpen);
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>&times;</button>
-        {showOtpScreen ? (
-          <OtpVerification
+    <>
+      {showNameModal ? (
+        <>
+          {console.log("Rendering EnterNameModal")}
+          <EnterNameModal
             phoneNumber={phoneNumber}
-            onVerified={handleOtpVerified}
-            onBack={handleBackToPhoneInput}
+            onNameSubmitted={handleNameSubmitted}
+            onClose={onClose}
           />
-        ) : (
+        </>
+      ) : (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button className="modal-close" onClick={onClose}>&times;</button>
+            {showOtpScreen ? (
+              <OtpVerification
+                phoneNumber={phoneNumber}
+                onVerified={handleOtpVerified}
+                onBack={handleBackToPhoneInput}
+                onNewUser={handleNewUser}
+              />
+            ) : (
           <>
             <div className="modal-left">
               <h2 className="modal-left-logo-text">zepto</h2>
@@ -121,15 +191,19 @@ export default function LoginModal({ isOpen, onClose }) {
               </p>
             </div>
             <div className="modal-right">
-              <div className="modal-right-image-placeholder"></div>
+              <div className="modal-right-image-placeholder"></div> {/* Placeholder for image */}
               <h2 className="modal-right-title">Order faster & easier everytime</h2>
               <p className="modal-right-subtitle-app">with the Zepto App</p>
               <div className="app-download-buttons">
+                {/* <img src={googlePlay} alt="Get it on Google Play" className="app-button" /> */}
+                {/* <img src={appStore} alt="Download on the App Store" className="app-button" /> */}
               </div>
             </div>
           </>
-        )}
-      </div>
-    </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -1,28 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
 import Navbar from './components/Navbar/Navbar'
-import Categories from './components/Categories/Categories'
-import Banners from './components/Banners/Banners'
-import ProductListing from './components/ProductListing/ProductListing' // New import
-import HeroSection from './components/HeroSection/HeroSection'
-import HowItWorks from './components/HowItWorks/HowItWorks'
-import Footer from './components/Footer/Footer'
+import Home from './pages/Home/Home'
+import ProductDetail from './pages/ProductDetail/ProductDetail'
+import ToastWrapper from './components/Toast/ToastWrapper'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    <Navbar/>
-    <Categories/>
-    <Banners/>
-    <ProductListing/> {/* New component */}
-    <HeroSection/>
-    <HowItWorks/>
-    <Footer/>
-    </>
+    <CartProvider>
+      <Router>
+        <Navbar/>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+        </Routes>
+        <ToastWrapper/>
+      </Router>
+    </CartProvider>
   )
 }
 

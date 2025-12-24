@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './OtpVerification.css';
 import { BASE_API_URL } from "../../api/apiConfig"; 
 
-export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
+export default function OtpVerification({ phoneNumber, onVerified, onBack, onNewUser }) {
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const [timer, setTimer] = useState(30);
   const [resendEnabled, setResendEnabled] = useState(false);
@@ -74,16 +74,98 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack }) {
         const result = await response.json();
 
         if (result.success) {
-          // Store phone number in localStorage
-          localStorage.setItem('userPhoneNumber', phoneNumber);
-
-          const userToken = result.data?.token || 'mock_jwt_token_for_user';
-          localStorage.setItem('authToken', userToken);
-
+          // Check if user is new BEFORE storing anything
+          // Priority: 1) API returns isNewUser flag, 2) Check if this phone number has a registered user
+          const existingUserName = localStorage.getItem('userName');
+          const storedPhoneNumber = localStorage.getItem('userPhoneNumber');
+          let isNewUser = false;
+          
+          if (result.data?.isNewUser !== undefined) {
+            // API explicitly returns isNewUser flag - trust the API
+            isNewUser = result.data.isNewUser === true;
+            console.log("API returned isNewUser:", result.data.isNewUser);
+          } else {
+            // API doesn't return isNewUser, check if this phone number is registered
+            const pendingPhone = localStorage.getItem('pendingPhoneNumber');
+            const phoneMatches = storedPhoneNumber === phoneNumber;
+            const isPendingPhone = pendingPhone === phoneNumber;
+            
+            // A user is "new" if:
+            // 1. No userName exists (first time registration), OR
+            // 2. The stored phone number doesn't match current phone number (different user)
+            // BUT: If userName exists and this is the pending phone (second OTP after name entry),
+            //      then this is completing registration, so NOT a new user
+            if (existingUserName && isPendingPhone) {
+              // This is the second OTP verification after name entry - completing registration
+              isNewUser = false;
+              console.log("Second OTP verification after name entry - completing registration");
+            } else {
+              // First time registration or different phone number
+              isNewUser = !existingUserName || !phoneMatches;
+            }
+            
+            console.log("API didn't return isNewUser, checking localStorage:");
+            console.log("  - userName exists:", !!existingUserName);
+            console.log("  - storedPhoneNumber:", storedPhoneNumber);
+            console.log("  - pendingPhoneNumber:", pendingPhone);
+            console.log("  - current phoneNumber:", phoneNumber);
+            console.log("  - phoneMatches:", phoneMatches);
+            console.log("  - isPendingPhone:", isPendingPhone);
+            console.log("  - isNewUser:", isNewUser);
+            
+            // Helpful message for testing
+            if (existingUserName && phoneMatches) {
+              console.log("✓ Existing user detected (same phone number with userName)");
+            } else if (existingUserName && !phoneMatches && !isPendingPhone) {
+              console.log("⚠️ Different phone number detected - treating as new user");
+            }
+          }
+          
+          // For new users, don't store authToken yet - wait until name is entered
+          // Store phone number temporarily
+          if (!isNewUser) {
+            // Existing user - store credentials immediately
+            localStorage.setItem('userPhoneNumber', phoneNumber);
+            const userToken = result.data?.token || 'mock_jwt_token_for_user';
+            localStorage.setItem('authToken', userToken);
+            console.log("Existing user - stored credentials");
+          } else {
+            // New user - store phone temporarily but not authToken yet
+            // We'll store authToken after name entry and second OTP verification
+            localStorage.setItem('pendingPhoneNumber', phoneNumber);
+            // Clear any existing authToken for new user flow
+            localStorage.removeItem('authToken');
+            console.log("New user - stored pendingPhoneNumber, cleared authToken");
+          }
+          
           setShowSuccessMessage(true); // Show success message
-          console.log("OTP verified successfully! Token:", userToken); 
+          console.log("OTP verified successfully!"); 
+          console.log("Final decision - isNewUser:", isNewUser, "onNewUser callback exists:", !!onNewUser);
+          console.log("Current localStorage - userName:", localStorage.getItem('userName'), "authToken:", localStorage.getItem('authToken'));
+          
           setTimeout(() => {
-            onVerified(); 
+            console.log("Timeout callback executing - isNewUser:", isNewUser);
+            if (isNewUser) {
+              if (onNewUser) {
+                console.log("Calling onNewUser callback - showing name modal");
+                try {
+                  // New user - show name entry modal
+                  onNewUser();
+                  console.log("onNewUser callback executed successfully");
+                } catch (error) {
+                  console.error("Error calling onNewUser:", error);
+                  onVerified(); // Fallback
+                }
+              } else {
+                console.error("onNewUser callback is not provided!");
+                // Fallback: proceed to home if callback not available
+                onVerified();
+              }
+            } else {
+              console.log("Existing user - calling onVerified callback");
+              // Existing user - proceed to home
+              onVerified(); 
+            }
           }, 1500); 
         } else {
           setError(result.message || "Invalid OTP. Please try again.");

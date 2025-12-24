@@ -131,6 +131,13 @@
   font-weight: 500;
   color: #111827;
   margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: 2.8em; /* 2 lines * 1.4 line-height */
 }
 
 .cart-item-unit {
@@ -172,6 +179,11 @@
   font-size: 16px;
   cursor: pointer;
   color: #ff4b85;
+}
+
+.cart-qty-btn:focus,
+.cart-qty-btn:active {
+  outline: none;
 }
 
 .cart-qty-value {
@@ -224,6 +236,11 @@
   font-weight: 500;
   cursor: pointer;
   margin-right: 20px;
+}
+
+.cart-add-more-btn:focus,
+.cart-add-more-btn:active {
+  outline: none;
 }
 
 /* Coupons card */
@@ -528,6 +545,11 @@
   cursor: pointer;
 }
 
+.cart-proceed-btn:focus,
+.cart-proceed-btn:active {
+  outline: none;
+}
+
 .cart-header {
   display: flex;
   align-items: center;
@@ -545,6 +567,11 @@
   font-size: 20px;
   cursor: pointer;
   color: black;
+}
+
+.cart-back-button:focus,
+.cart-back-button:active {
+  outline: none;
 }
 
 .cart-title {
@@ -586,6 +613,11 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.cart-browse-button:focus,
+.cart-browse-button:active {
+  outline: none;
 }
 
 @media (max-width: 768px) {
