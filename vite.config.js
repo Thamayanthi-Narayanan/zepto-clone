@@ -6,15 +6,16 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': { 
-        target: 'https://hyperactively-florescent-addilyn.ngrok-free.dev',
+        target: 'https://f271534d6156.ngrok-free.app',
         changeOrigin: true,
         secure: false,
       },
       '/auth': { 
-        target: 'https://hyperactively-florescent-addilyn.ngrok-free.dev',
+        target: 'https://f271534d6156.ngrok-free.app',
         changeOrigin: true,
         secure: false,
       },
     },
   },
 })
+// https://hyperactively-florescent-addilyn.ngrok-free.dev

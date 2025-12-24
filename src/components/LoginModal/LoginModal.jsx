@@ -23,10 +23,11 @@ export default function LoginModal({ isOpen, onClose }) {
       setShowOtpScreen(false);
       setShowNameModal(false);
       // Check if we have a pending phone number (from name entry flow)
+      // Don't remove it here - we need it for auto-fill after name entry
       const storedPhone = localStorage.getItem('pendingPhoneNumber');
       if (storedPhone) {
         setPhoneNumber(storedPhone);
-        localStorage.removeItem('pendingPhoneNumber');
+        setPendingPhoneNumber(storedPhone);
       } else {
         setPhoneNumber('');
       }
@@ -123,11 +124,14 @@ export default function LoginModal({ isOpen, onClose }) {
   const handleNameSubmitted = (name) => {
     // After name is submitted, go back to phone screen with auto-filled number
     setShowNameModal(false);
-    // Use pendingPhoneNumber or the stored phone number
+    // Use pendingPhoneNumber or the stored phone number from localStorage
     const phoneToUse = pendingPhoneNumber || phoneNumber || localStorage.getItem('pendingPhoneNumber');
     if (phoneToUse) {
       setPhoneNumber(phoneToUse);
-      // User needs to click Continue button to send OTP
+      setPendingPhoneNumber(phoneToUse);
+      // Ensure it's stored in localStorage for auto-fill
+      localStorage.setItem('pendingPhoneNumber', phoneToUse);
+      // User needs to click Continue button to send OTP again
       // Just return to phone input screen with auto-filled number
     }
   };

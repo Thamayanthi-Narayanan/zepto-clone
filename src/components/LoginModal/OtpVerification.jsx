@@ -121,21 +121,38 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack, onNew
             }
           }
           
-          // For new users, don't store authToken yet - wait until name is entered
-          // Store phone number temporarily
-          if (!isNewUser) {
+          // Check if this is the second OTP verification after user creation
+          const userId = localStorage.getItem('userId');
+          const pendingPhone = localStorage.getItem('pendingPhoneNumber');
+          const isSecondOtpAfterCreation = existingUserName && userId && pendingPhone === phoneNumber;
+          
+          if (isSecondOtpAfterCreation) {
+            // Second OTP verification after user creation - user is already created, log them in
+            localStorage.setItem('userPhoneNumber', phoneNumber);
+            // Use the token from user creation (stored in pendingAuthToken) or the new token from OTP
+            const finalToken = localStorage.getItem('pendingAuthToken') || result.data?.token || 'mock_jwt_token_for_user';
+            localStorage.setItem('authToken', finalToken);
+            // Clear temporary data
+            localStorage.removeItem('pendingPhoneNumber');
+            localStorage.removeItem('pendingAuthToken');
+            console.log("Second OTP verified - user already created, logging in");
+            // Skip the new user flow and directly verify
+            isNewUser = false;
+          } else if (!isNewUser) {
             // Existing user - store credentials immediately
             localStorage.setItem('userPhoneNumber', phoneNumber);
             const userToken = result.data?.token || 'mock_jwt_token_for_user';
             localStorage.setItem('authToken', userToken);
             console.log("Existing user - stored credentials");
           } else {
-            // New user - store phone temporarily but not authToken yet
-            // We'll store authToken after name entry and second OTP verification
+            // New user (first OTP) - store phone and token temporarily for user creation
             localStorage.setItem('pendingPhoneNumber', phoneNumber);
+            // Store token temporarily for user creation API call
+            const tempToken = result.data?.token || 'mock_jwt_token_for_user';
+            localStorage.setItem('pendingAuthToken', tempToken);
             // Clear any existing authToken for new user flow
             localStorage.removeItem('authToken');
-            console.log("New user - stored pendingPhoneNumber, cleared authToken");
+            console.log("New user - stored pendingPhoneNumber and pendingAuthToken");
           }
           
           setShowSuccessMessage(true); // Show success message
