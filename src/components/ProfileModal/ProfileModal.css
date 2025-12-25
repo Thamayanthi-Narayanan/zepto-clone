@@ -1,0 +1,295 @@
+.profile-modal-overlay {
+  position: fixed;
+  top: 90px; /* Start below navbar */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white; /* White background to hide all content */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center; /* Center the modal */
+  z-index: 999; /* Below navbar (1000) */
+  padding: 0;
+  padding-top: 10vh; /* 10% gap from top (below navbar) */
+  padding-bottom: 10vh; /* 10% gap from bottom */
+  box-sizing: border-box;
+}
+
+.profile-modal-content {
+  background: #f8f9fa; /* Light grey background like Zepto */
+  border-radius: 12px; /* Rounded corners on all outer edges */
+  width: 80%; /* 80% width - 10% left + 10% right = 20% gap */
+  height: 100%; /* Take full available height (after padding) */
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Clip inner elements to rounded corners */
+}
+
+.profile-modal-close {
+  display: none; /* Hide close button since navbar is visible */
+}
+
+.profile-modal-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  gap: 0; /* No gap - left and right should be attached */
+  padding: 0; /* No padding - content should be attached */
+}
+
+/* Left Sidebar */
+.profile-sidebar {
+  width: 25%; /* 25% width */
+  background: #f8f9fa; /* Light grey background */
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-right: 1px solid #e0e0e0; /* Only right border to attach to right content */
+  border-top-left-radius: 12px; /* Rounded only on outer left top */
+  border-bottom-left-radius: 12px; /* Rounded only on outer left bottom */
+  border-top-right-radius: 0; /* Straight edge on right */
+  border-bottom-right-radius: 0; /* Straight edge on right */
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-shrink: 0;
+}
+
+.profile-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* User Info Section */
+.profile-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent; /* No background box */
+  border: none; /* No border */
+  border-radius: 0; /* No rounded corners */
+  margin-bottom: 24px;
+}
+
+.profile-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #6b46c1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.profile-user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-user-phone {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Zepto Cash Section */
+.profile-cash-section {
+  background: transparent; /* No background box */
+  border-radius: 0; /* No rounded corners */
+  padding: 0;
+  margin-bottom: 24px;
+  border: none; /* No border */
+}
+
+.profile-cash-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.profile-cash-balance {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.profile-add-balance-btn {
+  width: 100%;
+  padding: 10px;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-add-balance-btn:hover {
+  background: #374151;
+}
+
+.profile-add-balance-btn:focus,
+.profile-add-balance-btn:active {
+  outline: none;
+}
+
+/* Menu Items */
+.profile-menu-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0; /* Only vertical padding, no horizontal */
+  background: transparent; /* No background box */
+  border: none; /* No border */
+  border-radius: 0; /* No rounded corners */
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 15px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.profile-menu-item:hover {
+  background: transparent; /* No hover background */
+  color: #6b46c1; /* Change text color on hover */
+}
+
+.profile-menu-item.active {
+  background: transparent; /* No active background */
+  color: #6b46c1;
+  font-weight: 600;
+}
+
+.profile-menu-item svg {
+  flex-shrink: 0;
+}
+
+/* Log Out Section */
+.profile-logout-section {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.profile-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-logout-btn:hover {
+  background: #dc2626;
+}
+
+.profile-logout-btn:focus,
+.profile-logout-btn:active {
+  outline: none;
+}
+
+/* Right Content Area */
+.profile-content-area {
+  width: 75%; /* 75% width */
+  background: white; /* White background */
+  border: none; /* No border - attached to left */
+  border-top-left-radius: 0; /* Straight edge on left */
+  border-bottom-left-radius: 0; /* Straight edge on left */
+  border-top-right-radius: 12px; /* Rounded only on outer right top */
+  border-bottom-right-radius: 12px; /* Rounded only on outer right bottom */
+  padding: 24px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-shrink: 0;
+}
+
+.profile-content-area::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .profile-modal-overlay {
+    top: 70px; /* Start below navbar */
+    padding-top: 10vh; /* 10% gap from top (below navbar) */
+    padding-bottom: 10vh; /* 10% gap from bottom */
+  }
+
+  .profile-modal-content {
+    width: 100%; /* Full width on mobile */
+    max-width: 100%;
+    height: 100%; /* Take full available height */
+    border-radius: 0; /* No rounded corners on mobile */
+  }
+
+  .profile-modal-body {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 0; /* No rounded corners on mobile */
+  }
+
+  .profile-content-area {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    border-radius: 0; /* No rounded corners on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-modal-overlay {
+    top: 60px; /* Start below navbar */
+    padding-top: 10vh; /* 10% gap from top (below navbar) */
+    padding-bottom: 10vh; /* 10% gap from bottom */
+  }
+
+  .profile-modal-content {
+    height: 100%; /* Take full available height */
+  }
+}
+

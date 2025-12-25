@@ -6,6 +6,7 @@ import LoginModal from "../LoginModal/LoginModal";
 import CartDrawer from "../CartDrawer/CartDrawer";
 import AddressModal from "../CartDrawer/AddressModal";
 import PaymentModal from "../CartDrawer/PaymentModal";
+import ProfileModal from "../ProfileModal/ProfileModal";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [scrollYBeforeLock, setScrollYBeforeLock] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -57,10 +59,20 @@ export default function Navbar() {
   };
 
   const handleLoginClick = () => {
-    console.log("Login button clicked, setting isLoginModalOpen to true");
-    setIsLoginModalOpen(true);
-    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen) {
-      lockScroll();
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      // User is logged in - open profile modal
+      setIsProfileModalOpen(true);
+      if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen && !isLoginModalOpen) {
+        lockScroll();
+      }
+    } else {
+      // User is not logged in - open login modal
+      console.log("Login button clicked, setting isLoginModalOpen to true");
+      setIsLoginModalOpen(true);
+      if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen) {
+        lockScroll();
+      }
     }
   };
 
@@ -70,7 +82,7 @@ export default function Navbar() {
     // Check login status when modal closes
     const authToken = localStorage.getItem('authToken');
     setIsLoggedIn(!!authToken);
-    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen) {
+    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen && !isProfileModalOpen) {
       unlockScroll();
     }
   };
@@ -84,7 +96,7 @@ export default function Navbar() {
 
   const handleCloseCart = () => {
     setIsCartOpen(false);
-    if (!isLoginModalOpen && !isAddressModalOpen && !isPaymentModalOpen) {
+    if (!isLoginModalOpen && !isAddressModalOpen && !isPaymentModalOpen && !isProfileModalOpen) {
       unlockScroll();
     }
   };
@@ -92,30 +104,53 @@ export default function Navbar() {
   const handleOpenAddressModal = () => {
     setIsAddressModalOpen(true);
     setIsCartOpen(false); // Close cart when opening address modal
-    if (!isLoginModalOpen && !isPaymentModalOpen) {
+    if (!isLoginModalOpen && !isPaymentModalOpen && !isProfileModalOpen) {
       lockScroll();
     }
   };
 
   const handleCloseAddressModal = () => {
     setIsAddressModalOpen(false);
-    if (!isLoginModalOpen && !isCartOpen && !isPaymentModalOpen) {
+    if (!isLoginModalOpen && !isCartOpen && !isPaymentModalOpen && !isProfileModalOpen) {
       unlockScroll();
     }
   };
 
   const handleOpenPaymentModal = () => {
     setIsPaymentModalOpen(true);
-    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen) {
+    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen && !isProfileModalOpen) {
       lockScroll();
     }
   };
 
   const handleClosePaymentModal = () => {
     setIsPaymentModalOpen(false);
-    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen) {
+    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen && !isProfileModalOpen) {
       unlockScroll();
     }
+  };
+
+  const handleCloseProfileModal = () => {
+    setIsProfileModalOpen(false);
+    // Check login status when modal closes
+    const authToken = localStorage.getItem('authToken');
+    setIsLoggedIn(!!authToken);
+    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen && !isPaymentModalOpen) {
+      unlockScroll();
+    }
+  };
+
+  const handleLogoClick = () => {
+    // Close all modals
+    setIsLoginModalOpen(false);
+    setIsCartOpen(false);
+    setIsAddressModalOpen(false);
+    setIsPaymentModalOpen(false);
+    setIsProfileModalOpen(false);
+    // Unlock scroll
+    unlockScroll();
+    // Navigate to home
+    navigate('/');
   };
 
   console.log("Navbar rendering, isLoginModalOpen:", isLoginModalOpen);
@@ -125,7 +160,7 @@ export default function Navbar() {
       
       {/* Left Section */}
       <div className="nav-left">
-        <div className="nav-logo-text" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>Infinite Store</div>
+        <div className="nav-logo-text" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>Infinite Store</div>
 
         <div className="nav-location">
           <span className="location-label">Select Location</span>
@@ -162,6 +197,10 @@ export default function Navbar() {
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={handleClosePaymentModal}
+      />
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={handleCloseProfileModal}
       />
     </nav>
   );
