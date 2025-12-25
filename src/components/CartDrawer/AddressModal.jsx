@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AddressModal.css';
 
-export default function AddressModal({ isOpen, onClose }) {
+export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
   const [addressType, setAddressType] = useState('Home'); // Home, Work, Others
   const [buildingType, setBuildingType] = useState('Society'); // Society, Independent house, Standalone
   const [formData, setFormData] = useState({
@@ -11,6 +11,24 @@ export default function AddressModal({ isOpen, onClose }) {
     receiverName: '',
     receiverNumber: ''
   });
+  const [errors, setErrors] = useState({});
+
+  // Auto-fill receiver name and number from localStorage when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const userName = localStorage.getItem('userName') || '';
+      const userPhoneNumber = localStorage.getItem('userPhoneNumber') || '';
+      
+      setFormData(prev => ({
+        ...prev,
+        receiverName: userName,
+        receiverNumber: userPhoneNumber
+      }));
+      
+      // Clear errors when modal opens
+      setErrors({});
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,17 +36,53 @@ export default function AddressModal({ isOpen, onClose }) {
       ...prev,
       [name]: value
     }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    if (!formData.flatNo.trim()) {
+      newErrors.flatNo = 'Flat No. / Floor is required';
+      isValid = false;
+    }
+    if (!formData.buildingName.trim()) {
+      newErrors.buildingName = 'Building name is required';
+      isValid = false;
+    }
+    if (!formData.landmark.trim()) {
+      newErrors.landmark = 'Landmark is required';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSaveAddress = () => {
+    if (!validateForm()) {
+      return;
+    }
+
     // TODO: Integrate with API later
     console.log('Saving address:', {
       addressType,
       buildingType,
       ...formData
     });
-    // For now, just close the modal
+    
+    // Close address modal and open payment modal
     onClose();
+    if (onSaveAddress) {
+      onSaveAddress();
+    }
   };
 
   if (!isOpen) return null;
@@ -108,9 +162,10 @@ export default function AddressModal({ isOpen, onClose }) {
                 name="flatNo"
                 value={formData.flatNo}
                 onChange={handleInputChange}
-                className="address-input"
+                className={`address-input ${errors.flatNo ? 'error' : ''}`}
                 placeholder="Flat No. / Floor"
               />
+              {errors.flatNo && <span className="address-error-message">{errors.flatNo}</span>}
             </div>
 
             <div className="address-input-group">
@@ -122,21 +177,25 @@ export default function AddressModal({ isOpen, onClose }) {
                 name="buildingName"
                 value={formData.buildingName}
                 onChange={handleInputChange}
-                className="address-input"
+                className={`address-input ${errors.buildingName ? 'error' : ''}`}
                 placeholder="Building name"
               />
+              {errors.buildingName && <span className="address-error-message">{errors.buildingName}</span>}
             </div>
 
             <div className="address-input-group">
-              <label className="address-input-label">Landmark</label>
+              <label className="address-input-label">
+                Landmark <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="landmark"
                 value={formData.landmark}
                 onChange={handleInputChange}
-                className="address-input"
+                className={`address-input ${errors.landmark ? 'error' : ''}`}
                 placeholder="Landmark"
               />
+              {errors.landmark && <span className="address-error-message">{errors.landmark}</span>}
             </div>
 
             <div className="address-input-group">
@@ -171,7 +230,11 @@ export default function AddressModal({ isOpen, onClose }) {
         </div>
 
         <div className="address-modal-footer">
-          <button className="address-save-btn" onClick={handleSaveAddress}>
+          <button 
+            className="address-save-btn" 
+            onClick={handleSaveAddress}
+            disabled={!formData.flatNo.trim() || !formData.buildingName.trim() || !formData.landmark.trim()}
+          >
             Save Address
           </button>
         </div>

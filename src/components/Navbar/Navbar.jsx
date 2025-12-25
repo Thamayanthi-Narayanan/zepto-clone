@@ -5,12 +5,14 @@ import { MagnifyingGlass, } from "@phosphor-icons/react"
 import LoginModal from "../LoginModal/LoginModal";
 import CartDrawer from "../CartDrawer/CartDrawer";
 import AddressModal from "../CartDrawer/AddressModal";
+import PaymentModal from "../CartDrawer/PaymentModal";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [scrollYBeforeLock, setScrollYBeforeLock] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -57,7 +59,7 @@ export default function Navbar() {
   const handleLoginClick = () => {
     console.log("Login button clicked, setting isLoginModalOpen to true");
     setIsLoginModalOpen(true);
-    if (!isCartOpen && !isLoginModalOpen) {
+    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen) {
       lockScroll();
     }
   };
@@ -68,21 +70,21 @@ export default function Navbar() {
     // Check login status when modal closes
     const authToken = localStorage.getItem('authToken');
     setIsLoggedIn(!!authToken);
-    if (!isCartOpen) {
+    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen) {
       unlockScroll();
     }
   };
 
   const handleCartClick = () => {
     setIsCartOpen(true);
-    if (!isCartOpen && !isLoginModalOpen) {
+    if (!isLoginModalOpen && !isAddressModalOpen && !isPaymentModalOpen) {
       lockScroll();
     }
   };
 
   const handleCloseCart = () => {
     setIsCartOpen(false);
-    if (!isLoginModalOpen && !isAddressModalOpen) {
+    if (!isLoginModalOpen && !isAddressModalOpen && !isPaymentModalOpen) {
       unlockScroll();
     }
   };
@@ -90,14 +92,28 @@ export default function Navbar() {
   const handleOpenAddressModal = () => {
     setIsAddressModalOpen(true);
     setIsCartOpen(false); // Close cart when opening address modal
-    if (!isLoginModalOpen) {
+    if (!isLoginModalOpen && !isPaymentModalOpen) {
       lockScroll();
     }
   };
 
   const handleCloseAddressModal = () => {
     setIsAddressModalOpen(false);
-    if (!isLoginModalOpen && !isCartOpen) {
+    if (!isLoginModalOpen && !isCartOpen && !isPaymentModalOpen) {
+      unlockScroll();
+    }
+  };
+
+  const handleOpenPaymentModal = () => {
+    setIsPaymentModalOpen(true);
+    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen) {
+      lockScroll();
+    }
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    if (!isLoginModalOpen && !isCartOpen && !isAddressModalOpen) {
       unlockScroll();
     }
   };
@@ -140,7 +156,12 @@ export default function Navbar() {
       />
       <AddressModal 
         isOpen={isAddressModalOpen} 
-        onClose={handleCloseAddressModal} 
+        onClose={handleCloseAddressModal}
+        onSaveAddress={handleOpenPaymentModal}
+      />
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={handleClosePaymentModal}
       />
     </nav>
   );

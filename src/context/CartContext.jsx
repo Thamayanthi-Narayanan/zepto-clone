@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { BASE_API_URL } from '../api/apiConfig';
 
 const CartContext = createContext();
 
@@ -15,24 +16,208 @@ export const CartProvider = ({ children }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  const addToCart = (product) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        // If product already exists, increase quantity
-        return prevItems.map((item) =>
-          item.id === product.id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        );
-      } else {
-        // Add new product with quantity 1
-        return [...prevItems, { ...product, qty: 1 }];
+  // Fetch cart items from API
+  const fetchCartItems = useCallback(async () => {
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!authToken) {
+      // User not logged in - clear cart
+      setCartItems([]);
+      return;
+    }
+
+    try {
+      const VIEW_CART_URL = BASE_API_URL + "/api/cart";
+      console.log("Fetching cart items - URL:", VIEW_CART_URL);
+      
+      const response = await fetch(VIEW_CART_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          // Cart is empty - this is OK, just set empty array
+          console.log("Cart is empty");
+          setCartItems([]);
+          return;
+        } else if (response.status === 401) {
+          // Token invalid - clear cart and token
+          console.log("Token invalid, clearing cart");
+          localStorage.removeItem('authToken');
+          setCartItems([]);
+          return;
+        }
+        
+        // Other errors
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          console.error("Failed to parse error response:", jsonError);
+        }
+        console.error("Error fetching cart:", errorData);
+        return;
       }
-    });
-    // Show toast notification
-    setToastMessage('Added to cart!');
-    setShowToast(true);
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        // Map API response to cart items format
+        // API returns array of products, each needs a qty field
+        const mappedItems = result.data.map((item) => ({
+          ...item,
+          qty: item.qty || 1, // Use qty from API if available, otherwise default to 1
+          id: item.id, // Use the cart item ID from API
+        }));
+        
+        console.log("Cart items fetched:", mappedItems);
+        setCartItems(mappedItems);
+      } else {
+        console.log("Cart fetch response not successful:", result);
+        setCartItems([]);
+      }
+    } catch (err) {
+      console.error("Error fetching cart items:", err);
+      // Don't show error to user - just log it
+    }
+  }, []);
+
+  // Monitor login/logout status and manage cart accordingly
+  useEffect(() => {
+    const handleUserLogin = () => {
+      console.log("User logged in, fetching cart items");
+      // Always fetch cart on login to get user's cart from backend
+      fetchCartItems();
+    };
+
+    // Listen for login events
+    window.addEventListener('userLoggedIn', handleUserLogin);
+    
+    // Monitor localStorage for authToken changes (logout detection)
+    let previousToken = localStorage.getItem('authToken');
+    const checkAuthStatus = () => {
+      const currentToken = localStorage.getItem('authToken');
+      
+      // If token was removed (logout)
+      if (previousToken && !currentToken) {
+        console.log("User logged out, clearing cart");
+        setCartItems([]);
+      }
+      // If token was added (login) - this is handled by userLoggedIn event, but check here too
+      else if (!previousToken && currentToken) {
+        console.log("Token detected, fetching cart");
+        fetchCartItems();
+      }
+      
+      previousToken = currentToken;
+    };
+
+    // Check on mount - if user is logged in, fetch their cart
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      console.log("User already logged in on mount, fetching cart");
+      fetchCartItems();
+    } else {
+      // User not logged in - ensure cart is empty
+      setCartItems([]);
+    }
+    
+    // Check periodically for authToken changes (login/logout detection)
+    const interval = setInterval(checkAuthStatus, 500);
+
+    return () => {
+      window.removeEventListener('userLoggedIn', handleUserLogin);
+      clearInterval(interval);
+    };
+  }, [fetchCartItems]);
+
+  const addToCart = async (product) => {
+    // Check if user is logged in
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!authToken) {
+      // User not logged in - show error or prompt to login
+      setToastMessage('Please login to add items to cart');
+      setShowToast(true);
+      return;
+    }
+
+    try {
+      // Call API to add product to cart - product ID in URL path
+      const ADD_TO_CART_URL = BASE_API_URL + `/api/cart/add/${product.id}`;
+      console.log("Adding to cart - URL:", ADD_TO_CART_URL);
+      console.log("Product ID:", product.id);
+      console.log("Auth Token:", authToken ? `${authToken.substring(0, 20)}...` : 'No token');
+      
+      const response = await fetch(ADD_TO_CART_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+        // No body needed - product ID is in the URL path
+      });
+      
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          errorData = await response.json();
+          console.error("API Error Response:", errorData);
+        } catch (jsonError) {
+          console.error("Failed to parse error response:", jsonError);
+          setToastMessage(`Failed to add to cart (${response.status}). Please try again.`);
+          setShowToast(true);
+          return;
+        }
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          setToastMessage('Please login to add items to cart');
+          setShowToast(true);
+          // Clear invalid token
+          localStorage.removeItem('authToken');
+          return;
+        } else if (response.status === 404) {
+          // 404 could mean endpoint not found or product not found
+          const errorMsg = errorData.error || errorData.message || 'Endpoint or product not found';
+          console.error("404 Error - Path:", errorData.path, "Error:", errorMsg);
+          setToastMessage(`Cart endpoint not found. Please check the API configuration.`);
+          setShowToast(true);
+          return;
+        } else {
+          setToastMessage(errorData.message || errorData.error || "Failed to add to cart. Please try again.");
+          setShowToast(true);
+          return;
+        }
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // API call successful - refresh cart from server to get latest state
+        // This ensures cart is in sync with backend
+        await fetchCartItems();
+        // Show success toast notification
+        setToastMessage('Added to cart!');
+        setShowToast(true);
+      } else {
+        setToastMessage(result.message || "Failed to add to cart. Please try again.");
+        setShowToast(true);
+      }
+    } catch (err) {
+      console.error("Error adding product to cart:", err);
+      setToastMessage("Network error. Please try again.");
+      setShowToast(true);
+    }
   };
 
   const removeFromCart = (productId) => {

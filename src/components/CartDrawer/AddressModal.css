@@ -198,6 +198,7 @@
   font-family: inherit;
   background: white;
   transition: border-color 0.2s;
+  color: black;
 }
 
 /* Remove border for inputs inside wrapper */
@@ -211,8 +212,24 @@
   outline: none;
 }
 
+.address-input.error {
+  border-color: #ff4444;
+}
+
+.address-input.error:focus {
+  border-color: #ff4444;
+}
+
 .address-input::placeholder {
   color: #999;
+}
+
+.address-error-message {
+  display: block;
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 4px;
+  padding-left: 2px;
 }
 
 .address-modal-footer {
@@ -248,6 +265,18 @@
 .address-save-btn:focus,
 .address-save-btn:active {
   outline: none;
+}
+
+.address-save-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.address-save-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* Mobile responsiveness */
