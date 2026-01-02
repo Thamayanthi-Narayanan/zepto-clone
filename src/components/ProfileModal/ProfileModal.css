@@ -232,6 +232,49 @@
   outline: none;
 }
 
+.profile-logout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Delete Account Section */
+.profile-delete-account-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.profile-delete-account-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #991b1b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-delete-account-btn:hover {
+  background: #7f1d1d;
+}
+
+.profile-delete-account-btn:focus,
+.profile-delete-account-btn:active {
+  outline: none;
+}
+
+.profile-delete-account-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Right Content Area */
 .profile-content-area {
   width: 75%; /* 75% width */

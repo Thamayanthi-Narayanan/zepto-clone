@@ -365,6 +365,8 @@ export const CartProvider = ({ children }) => {
     showToast,
     toastMessage,
     hideToast,
+    setShowToast,
+    setToastMessage,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

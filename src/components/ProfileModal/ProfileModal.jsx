@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ProfileModal.css';
-import { ShoppingBag, ChatCircle, Heart, MapPin, User, SignOut } from '@phosphor-icons/react';
+import { ShoppingBag, ChatCircle, Heart, MapPin, User, SignOut, Trash } from '@phosphor-icons/react';
 import { BASE_API_URL } from '../../api/apiConfig';
+import { useCart } from '../../context/CartContext';
 
 export default function ProfileModal({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const { setToastMessage, setShowToast } = useCart();
   const [activeTab, setActiveTab] = useState('Orders');
   const [userName, setUserName] = useState('');
   const [userPhoneNumber, setUserPhoneNumber] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [loadingMenuItems, setLoadingMenuItems] = useState(false);
 
@@ -158,6 +163,9 @@ export default function ProfileModal({ isOpen, onClose }) {
       clearLocalStorage();
       window.dispatchEvent(new Event('userLoggedIn')); // Trigger logout event
       onClose();
+      // Show toast notification
+      setToastMessage("Logged out successfully");
+      setShowToast(true);
       return;
     }
 
@@ -205,6 +213,9 @@ export default function ProfileModal({ isOpen, onClose }) {
       window.dispatchEvent(new Event('userLoggedIn')); // Trigger logout event
       setIsLoggingOut(false);
       onClose();
+      // Show toast notification
+      setToastMessage("Logged out successfully");
+      setShowToast(true);
     }
   };
 
@@ -215,6 +226,122 @@ export default function ProfileModal({ isOpen, onClose }) {
     localStorage.removeItem('userId');
     localStorage.removeItem('pendingPhoneNumber');
     localStorage.removeItem('pendingAuthToken');
+  };
+
+  const clearAllLocalStorage = () => {
+    // Clear all user-related data
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userPhoneNumber');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('pendingPhoneNumber');
+    localStorage.removeItem('pendingAuthToken');
+    localStorage.removeItem('selectedAddress');
+    // Clear cart data if stored
+    localStorage.removeItem('cartItems');
+  };
+
+  const handleDeleteAccount = async () => {
+    // Confirm deletion
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete your account? This action is irreversible and will permanently delete all your data.'
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!authToken) {
+      // No token, just clear all local storage and close
+      clearAllLocalStorage();
+      window.dispatchEvent(new Event('userLoggedIn')); // Trigger logout event to update navbar
+      onClose();
+      navigate('/');
+      return;
+    }
+
+    setIsDeletingAccount(true);
+
+    try {
+      const DELETE_ACCOUNT_URL = BASE_API_URL + "/api/user/delete-account";
+      const response = await fetch(DELETE_ACCOUNT_URL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            errorData = await response.json();
+          } else {
+            const text = await response.text();
+            errorData = { message: text || `Error: ${response.status}` };
+          }
+        } catch (parseError) {
+          console.error("Failed to parse delete account error response:", parseError);
+          errorData = { message: `Error: ${response.status} ${response.statusText}` };
+        }
+        console.error("Delete account API error:", errorData.message || `Status: ${response.status}`);
+        setToastMessage(errorData.message || "Failed to delete account. Please try again.");
+        setShowToast(true);
+        setIsDeletingAccount(false);
+        return;
+      }
+
+      // Handle successful response (could be JSON or text)
+      let result = null;
+      try {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          result = await response.json();
+        } else {
+          // If response is text/plain, treat 200 OK as success
+          const text = await response.text();
+          console.log("Delete account response (text):", text);
+          result = { success: true, message: "Account deleted successfully" };
+        }
+      } catch (parseError) {
+        console.error("Failed to parse delete account response:", parseError);
+        // If we can't parse but status is 200, treat as success
+        result = { success: true, message: "Account deleted successfully" };
+      }
+
+      if (result && result.success) {
+        console.log("Account deleted successfully");
+        // Clear all local storage
+        clearAllLocalStorage();
+        // Close modal first
+        onClose();
+        // Show toast notification
+        setToastMessage("Account deleted successfully");
+        setShowToast(true);
+        // Use setTimeout to ensure localStorage is cleared and React state updates
+        setTimeout(() => {
+          // Trigger logout event to update navbar immediately
+          window.dispatchEvent(new Event('userLoggedIn'));
+          // Navigate to home page
+          navigate('/');
+        }, 50);
+      } else {
+        console.error("Delete account failed:", result?.message);
+        setToastMessage(result?.message || "Failed to delete account. Please try again.");
+        setShowToast(true);
+        setIsDeletingAccount(false);
+      }
+    } catch (err) {
+      console.error("Error during account deletion:", err);
+      setToastMessage("Network error. Please try again.");
+      setShowToast(true);
+      setIsDeletingAccount(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -275,10 +402,22 @@ export default function ProfileModal({ isOpen, onClose }) {
               <button 
                 className="profile-logout-btn" 
                 onClick={handleLogout}
-                disabled={isLoggingOut}
+                disabled={isLoggingOut || isDeletingAccount}
               >
                 <SignOut size={20} weight="regular" />
                 <span>{isLoggingOut ? 'Logging Out...' : 'Log Out'}</span>
+              </button>
+            </div>
+
+            {/* Delete Account Button */}
+            <div className="profile-delete-account-section">
+              <button 
+                className="profile-delete-account-btn" 
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount || isLoggingOut}
+              >
+                <Trash size={20} weight="regular" />
+                <span>{isDeletingAccount ? 'Deleting Account...' : 'Delete Account'}</span>
               </button>
             </div>
           </div>
