@@ -160,6 +160,15 @@
   gap: 8px;
 }
 
+.profile-menu-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
 .profile-menu-item {
   display: flex;
   align-items: center;

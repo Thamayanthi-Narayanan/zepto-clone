@@ -74,57 +74,13 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack, onNew
         const result = await response.json();
 
         if (result.success) {
-          // Check if user is new BEFORE storing anything
-          // Priority: 1) API returns isNewUser flag, 2) Check if this phone number has a registered user
+          // Check if this is the second OTP verification after user creation (name entry)
           const existingUserName = localStorage.getItem('userName');
-          const storedPhoneNumber = localStorage.getItem('userPhoneNumber');
-          let isNewUser = false;
-          
-          if (result.data?.isNewUser !== undefined) {
-            // API explicitly returns isNewUser flag - trust the API
-            isNewUser = result.data.isNewUser === true;
-            console.log("API returned isNewUser:", result.data.isNewUser);
-          } else {
-            // API doesn't return isNewUser, check if this phone number is registered
-            const pendingPhone = localStorage.getItem('pendingPhoneNumber');
-            const phoneMatches = storedPhoneNumber === phoneNumber;
-            const isPendingPhone = pendingPhone === phoneNumber;
-            
-            // A user is "new" if:
-            // 1. No userName exists (first time registration), OR
-            // 2. The stored phone number doesn't match current phone number (different user)
-            // BUT: If userName exists and this is the pending phone (second OTP after name entry),
-            //      then this is completing registration, so NOT a new user
-            if (existingUserName && isPendingPhone) {
-              // This is the second OTP verification after name entry - completing registration
-              isNewUser = false;
-              console.log("Second OTP verification after name entry - completing registration");
-            } else {
-              // First time registration or different phone number
-              isNewUser = !existingUserName || !phoneMatches;
-            }
-            
-            console.log("API didn't return isNewUser, checking localStorage:");
-            console.log("  - userName exists:", !!existingUserName);
-            console.log("  - storedPhoneNumber:", storedPhoneNumber);
-            console.log("  - pendingPhoneNumber:", pendingPhone);
-            console.log("  - current phoneNumber:", phoneNumber);
-            console.log("  - phoneMatches:", phoneMatches);
-            console.log("  - isPendingPhone:", isPendingPhone);
-            console.log("  - isNewUser:", isNewUser);
-            
-            // Helpful message for testing
-            if (existingUserName && phoneMatches) {
-              console.log("✓ Existing user detected (same phone number with userName)");
-            } else if (existingUserName && !phoneMatches && !isPendingPhone) {
-              console.log("⚠️ Different phone number detected - treating as new user");
-            }
-          }
-          
-          // Check if this is the second OTP verification after user creation
           const userId = localStorage.getItem('userId');
           const pendingPhone = localStorage.getItem('pendingPhoneNumber');
           const isSecondOtpAfterCreation = existingUserName && userId && pendingPhone === phoneNumber;
+          
+          let isNewUser = false;
           
           if (isSecondOtpAfterCreation) {
             // Second OTP verification after user creation - user is already created, log them in
@@ -136,23 +92,65 @@ export default function OtpVerification({ phoneNumber, onVerified, onBack, onNew
             localStorage.removeItem('pendingPhoneNumber');
             localStorage.removeItem('pendingAuthToken');
             console.log("Second OTP verified - user already created, logging in");
-            // Skip the new user flow and directly verify
             isNewUser = false;
-          } else if (!isNewUser) {
-            // Existing user - store credentials immediately
-            localStorage.setItem('userPhoneNumber', phoneNumber);
-            const userToken = result.data?.token || 'mock_jwt_token_for_user';
-            localStorage.setItem('authToken', userToken);
-            console.log("Existing user - stored credentials");
           } else {
-            // New user (first OTP) - store phone and token temporarily for user creation
-            localStorage.setItem('pendingPhoneNumber', phoneNumber);
-            // Store token temporarily for user creation API call
-            const tempToken = result.data?.token || 'mock_jwt_token_for_user';
-            localStorage.setItem('pendingAuthToken', tempToken);
-            // Clear any existing authToken for new user flow
-            localStorage.removeItem('authToken');
-            console.log("New user - stored pendingPhoneNumber and pendingAuthToken");
+            // First OTP verification - determine if user is new or existing
+            // Priority: 1) API returns isNewUser flag, 2) API returns userId (user exists), 3) Check localStorage
+            
+            if (result.data?.isNewUser !== undefined) {
+              // API explicitly returns isNewUser flag - trust the API
+              isNewUser = result.data.isNewUser === true;
+              console.log("API returned isNewUser:", result.data.isNewUser);
+            } else if (result.data?.userId) {
+              // API returns userId - user exists in database
+              isNewUser = false;
+              console.log("API returned userId - existing user detected");
+            } else {
+              // API doesn't return clear indicator - check localStorage
+              // A user is "new" only if:
+              // 1. No userName exists in localStorage, AND
+              // 2. No userPhoneNumber matches current phone number
+              const storedPhoneNumber = localStorage.getItem('userPhoneNumber');
+              const phoneMatches = storedPhoneNumber === phoneNumber;
+              const hasExistingUser = existingUserName && phoneMatches;
+              
+              isNewUser = !hasExistingUser;
+              
+              console.log("API didn't return clear indicator, checking localStorage:");
+              console.log("  - userName exists:", !!existingUserName);
+              console.log("  - storedPhoneNumber:", storedPhoneNumber);
+              console.log("  - current phoneNumber:", phoneNumber);
+              console.log("  - phoneMatches:", phoneMatches);
+              console.log("  - hasExistingUser:", hasExistingUser);
+              console.log("  - isNewUser:", isNewUser);
+            }
+            
+            // Store credentials based on user type
+            if (!isNewUser) {
+              // Existing user - store credentials immediately
+              localStorage.setItem('userPhoneNumber', phoneNumber);
+              const userToken = result.data?.token || 'mock_jwt_token_for_user';
+              localStorage.setItem('authToken', userToken);
+              // Store userId if provided
+              if (result.data?.userId) {
+                localStorage.setItem('userId', result.data.userId.toString());
+              }
+              // Store userName if provided
+              if (result.data?.userName) {
+                localStorage.setItem('userName', result.data.userName);
+              }
+              console.log("Existing user - stored credentials");
+            } else {
+              // New user (first OTP) - store phone and token temporarily for user creation
+              localStorage.setItem('pendingPhoneNumber', phoneNumber);
+              // Store token temporarily for user creation API call
+              const tempToken = result.data?.token || 'mock_jwt_token_for_user';
+              localStorage.setItem('pendingAuthToken', tempToken);
+              // Clear any existing authToken for new user flow
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('userId');
+              console.log("New user - stored pendingPhoneNumber and pendingAuthToken");
+            }
           }
           
           setShowSuccessMessage(true); // Show success message

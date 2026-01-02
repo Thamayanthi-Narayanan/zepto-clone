@@ -22,14 +22,26 @@ export default function LoginModal({ isOpen, onClose }) {
     if (isOpen) {
       setShowOtpScreen(false);
       setShowNameModal(false);
-      // Check if we have a pending phone number (from name entry flow)
-      // Don't remove it here - we need it for auto-fill after name entry
-      const storedPhone = localStorage.getItem('pendingPhoneNumber');
-      if (storedPhone) {
-        setPhoneNumber(storedPhone);
-        setPendingPhoneNumber(storedPhone);
-      } else {
+      
+      // Check if user is already logged in - if so, clear any pending data
+      const existingAuthToken = localStorage.getItem('authToken');
+      const existingUserId = localStorage.getItem('userId');
+      if (existingAuthToken && existingUserId) {
+        // User is already logged in - clear any pending registration data
+        localStorage.removeItem('pendingPhoneNumber');
+        localStorage.removeItem('pendingAuthToken');
         setPhoneNumber('');
+        setPendingPhoneNumber('');
+      } else {
+        // Check if we have a pending phone number (from name entry flow)
+        // Don't remove it here - we need it for auto-fill after name entry
+        const storedPhone = localStorage.getItem('pendingPhoneNumber');
+        if (storedPhone) {
+          setPhoneNumber(storedPhone);
+          setPendingPhoneNumber(storedPhone);
+        } else {
+          setPhoneNumber('');
+        }
       }
       setError('');
     }

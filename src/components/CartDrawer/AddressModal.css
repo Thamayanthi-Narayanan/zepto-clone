@@ -232,6 +232,18 @@
   padding-left: 2px;
 }
 
+.address-api-error {
+  display: block;
+  color: #ff4444;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background-color: #fff5f5;
+  border: 1px solid #ff4444;
+  border-radius: 6px;
+  text-align: center;
+}
+
 .address-modal-footer {
   padding: 20px 24px;
   border-top: 1px solid #f0f0f0;

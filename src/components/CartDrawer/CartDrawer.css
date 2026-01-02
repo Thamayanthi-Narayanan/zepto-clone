@@ -199,6 +199,32 @@
   font-size: 13px;
 }
 
+.cart-item-remove-btn {
+  border: none;
+  background-color: transparent;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.cart-item-remove-btn:hover {
+  background-color: #f3f4f6;
+  color: #ef4444;
+}
+
+.cart-item-remove-btn:focus,
+.cart-item-remove-btn:active {
+  outline: none;
+  background-color: #e5e7eb;
+}
+
 .cart-item-mrp {
   color: #9ca3af;
   text-decoration: line-through;

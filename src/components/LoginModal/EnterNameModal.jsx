@@ -32,6 +32,16 @@ export default function EnterNameModal({ phoneNumber, onNameSubmitted, onClose }
       // Get phone number and token from localStorage
       const phoneToUse = phoneNumber || localStorage.getItem('pendingPhoneNumber');
       const authToken = localStorage.getItem('pendingAuthToken');
+      
+      // Check if user already exists (has authToken and userId) - this shouldn't happen, but safeguard
+      const existingAuthToken = localStorage.getItem('authToken');
+      const existingUserId = localStorage.getItem('userId');
+      if (existingAuthToken && existingUserId && !authToken) {
+        // User already exists - this modal shouldn't have opened
+        setError('User already exists. Please close and log in again.');
+        setLoading(false);
+        return;
+      }
 
       if (!phoneToUse) {
         setError('Phone number not found. Please try again.');

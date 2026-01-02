@@ -1,9 +1,10 @@
 import React from "react";
 import "./CartDrawer.css";
 import { useCart } from '../../context/CartContext';
+import { Trash } from '@phosphor-icons/react';
 
 export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
-  const { cartItems, updateQuantity, calculateTotals } = useCart();
+  const { cartItems, updateQuantity, calculateTotals, removeFromCart } = useCart();
   const totals = calculateTotals();
 
   if (!isOpen) return null;
@@ -97,6 +98,13 @@ export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
                       <button className="cart-qty-btn" onClick={() => updateQuantity(item.id, item.qty + 1)}>+</button>
                     </div>
                     <div className="cart-item-price">₹{itemTotalPrice}</div>
+                    <button 
+                      className="cart-item-remove-btn" 
+                      onClick={() => removeFromCart(item.id)}
+                      title="Remove item"
+                    >
+                      <Trash size={18} weight="regular" />
+                    </button>
                   </div>
                   <div className="cart-item-mrp">₹{itemTotalMRP}</div>
                 </div>

@@ -220,8 +220,83 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+  const removeFromCart = async (productId) => {
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!authToken) {
+      // User not logged in - just remove from local state
+      setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+      return;
+    }
+
+    try {
+      // Call API to remove product from cart - product ID in URL path
+      const REMOVE_FROM_CART_URL = BASE_API_URL + `/api/cart/remove/${productId}`;
+      console.log("Removing from cart - URL:", REMOVE_FROM_CART_URL);
+      console.log("Product ID:", productId);
+      
+      const response = await fetch(REMOVE_FROM_CART_URL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          errorData = await response.json();
+          console.error("API Error Response:", errorData);
+        } catch (jsonError) {
+          console.error("Failed to parse error response:", jsonError);
+        }
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          setToastMessage('Please login to remove items from cart');
+          setShowToast(true);
+          localStorage.removeItem('authToken');
+          // Still remove from local state
+          setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+          return;
+        } else if (response.status === 404) {
+          // Product not found - might already be removed, refresh cart
+          console.log("Product not found in cart, refreshing cart");
+          await fetchCartItems();
+          setToastMessage('Item removed from cart');
+          setShowToast(true);
+          return;
+        } else {
+          setToastMessage(errorData.message || "Failed to remove from cart. Please try again.");
+          setShowToast(true);
+          // Still remove from local state even if API fails
+          setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+          return;
+        }
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // API call successful - refresh cart from server to get latest state
+        await fetchCartItems();
+        setToastMessage('Item removed from cart');
+        setShowToast(true);
+      } else {
+        setToastMessage(result.message || "Failed to remove from cart. Please try again.");
+        setShowToast(true);
+        // Still remove from local state
+        setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+      }
+    } catch (err) {
+      console.error("Error removing product from cart:", err);
+      setToastMessage("Network error. Please try again.");
+      setShowToast(true);
+      // Still remove from local state on network error
+      setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+    }
   };
 
   const updateQuantity = (productId, newQty) => {

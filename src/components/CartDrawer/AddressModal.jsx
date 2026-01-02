@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './AddressModal.css';
+import { BASE_API_URL } from '../../api/apiConfig';
 
 export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
   const [addressType, setAddressType] = useState('Home'); // Home, Work, Others
@@ -9,9 +10,14 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
     buildingName: '',
     landmark: '',
     receiverName: '',
-    receiverNumber: ''
+    receiverNumber: '',
+    city: '',
+    state: '',
+    pincode: ''
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   // Auto-fill receiver name and number from localStorage when modal opens
   useEffect(() => {
@@ -19,22 +25,40 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
       const userName = localStorage.getItem('userName') || '';
       const userPhoneNumber = localStorage.getItem('userPhoneNumber') || '';
       
-      setFormData(prev => ({
-        ...prev,
+      // Reset form data but keep receiver name and number
+      setFormData({
+        flatNo: '',
+        buildingName: '',
+        landmark: '',
         receiverName: userName,
-        receiverNumber: userPhoneNumber
-      }));
+        receiverNumber: userPhoneNumber,
+        city: '',
+        state: '',
+        pincode: ''
+      });
       
-      // Clear errors when modal opens
+      // Clear errors and API error when modal opens
       setErrors({});
+      setApiError('');
     }
   }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // For pincode, only allow digits
+    let processedValue = value;
+    if (name === 'pincode') {
+      processedValue = value.replace(/[^0-9]/g, '');
+    }
+    // For receiver number, only allow digits
+    if (name === 'receiverNumber') {
+      processedValue = value.replace(/[^0-9]/g, '');
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: processedValue
     }));
     // Clear error for this field when user starts typing
     if (errors[name]) {
@@ -42,6 +66,10 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
         ...prev,
         [name]: ''
       }));
+    }
+    // Clear API error when user starts typing
+    if (apiError) {
+      setApiError('');
     }
   };
 
@@ -61,27 +89,115 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
       newErrors.landmark = 'Landmark is required';
       isValid = false;
     }
+    if (!formData.city.trim()) {
+      newErrors.city = 'City is required';
+      isValid = false;
+    }
+    if (!formData.state.trim()) {
+      newErrors.state = 'State is required';
+      isValid = false;
+    }
+    if (!formData.pincode.trim()) {
+      newErrors.pincode = 'Pincode is required';
+      isValid = false;
+    } else if (!/^\d{6}$/.test(formData.pincode.trim())) {
+      newErrors.pincode = 'Pincode must be 6 digits';
+      isValid = false;
+    }
 
     setErrors(newErrors);
     return isValid;
   };
 
-  const handleSaveAddress = () => {
+  const handleSaveAddress = async () => {
     if (!validateForm()) {
       return;
     }
 
-    // TODO: Integrate with API later
-    console.log('Saving address:', {
-      addressType,
-      buildingType,
-      ...formData
-    });
+    const authToken = localStorage.getItem('authToken');
     
-    // Close address modal and open payment modal
-    onClose();
-    if (onSaveAddress) {
-      onSaveAddress();
+    if (!authToken) {
+      setApiError('Please login to save address');
+      return;
+    }
+
+    setLoading(true);
+    setApiError('');
+
+    try {
+      // Map addressType to API format (HOME, WORK, OTHERS)
+      const addressTypeMap = {
+        'Home': 'HOME',
+        'Work': 'WORK',
+        'Others': 'OTHERS'
+      };
+
+      const requestBody = {
+        name: formData.receiverName.trim() || localStorage.getItem('userName') || '',
+        mobileNumber: formData.receiverNumber.trim() || localStorage.getItem('userPhoneNumber') || '',
+        addressLine1: formData.flatNo.trim(),
+        addressLine2: formData.buildingName.trim(),
+        landmark: formData.landmark.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
+        pincode: formData.pincode.trim(),
+        addressType: addressTypeMap[addressType] || 'HOME',
+        defaultAddress: true
+      };
+
+      const ADD_ADDRESS_URL = BASE_API_URL + "/api/address/add";
+      console.log("Adding address - URL:", ADD_ADDRESS_URL);
+      console.log("Request body:", requestBody);
+
+      const response = await fetch(ADD_ADDRESS_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          errorData = await response.json();
+          console.error("API Error Response:", errorData);
+        } catch (jsonError) {
+          console.error("Failed to parse error response:", jsonError);
+        }
+
+        if (response.status === 401) {
+          setApiError('Please login to save address');
+          localStorage.removeItem('authToken');
+        } else if (response.status === 400) {
+          setApiError(errorData.message || 'Invalid address data. Please check all fields.');
+        } else {
+          setApiError(errorData.message || 'Failed to save address. Please try again.');
+        }
+        setLoading(false);
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("Address added successfully:", result.data);
+        // Close address modal and open payment modal
+        setLoading(false);
+        onClose();
+        if (onSaveAddress) {
+          onSaveAddress();
+        }
+      } else {
+        setApiError(result.message || 'Failed to save address. Please try again.');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Error saving address:", err);
+      setApiError("Network error. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -226,16 +342,71 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
                 />
               </div>
             </div>
+
+            <div className="address-input-group">
+              <label className="address-input-label">
+                City <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                className={`address-input ${errors.city ? 'error' : ''}`}
+                placeholder="City"
+              />
+              {errors.city && <span className="address-error-message">{errors.city}</span>}
+            </div>
+
+            <div className="address-input-group">
+              <label className="address-input-label">
+                State <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleInputChange}
+                className={`address-input ${errors.state ? 'error' : ''}`}
+                placeholder="State"
+              />
+              {errors.state && <span className="address-error-message">{errors.state}</span>}
+            </div>
+
+            <div className="address-input-group">
+              <label className="address-input-label">
+                Pincode <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                className={`address-input ${errors.pincode ? 'error' : ''}`}
+                placeholder="Pincode (6 digits)"
+                maxLength="6"
+              />
+              {errors.pincode && <span className="address-error-message">{errors.pincode}</span>}
+            </div>
           </div>
         </div>
 
         <div className="address-modal-footer">
+          {apiError && <div className="address-api-error">{apiError}</div>}
           <button 
             className="address-save-btn" 
             onClick={handleSaveAddress}
-            disabled={!formData.flatNo.trim() || !formData.buildingName.trim() || !formData.landmark.trim()}
+            disabled={
+              loading || 
+              !formData.flatNo.trim() || 
+              !formData.buildingName.trim() || 
+              !formData.landmark.trim() ||
+              !formData.city.trim() ||
+              !formData.state.trim() ||
+              !formData.pincode.trim()
+            }
           >
-            Save Address
+            {loading ? 'Saving...' : 'Save Address'}
           </button>
         </div>
       </div>
