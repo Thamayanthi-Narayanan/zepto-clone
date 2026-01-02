@@ -17,7 +17,16 @@
   z-index: 901;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; 
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  /* Hide scrollbar but keep scrolling functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.cart-drawer::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .cart-savings-banner {
@@ -107,15 +116,24 @@
 }
 
 .cart-item-left {
-  margin-right: 8px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .cart-item-image {
-  width: 40px;
-  height: 60px;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   border-radius: 8px;
-  border: 1px solid #f0f0f0;
+  display: block;
 }
 
 .cart-item-middle {

@@ -2,10 +2,18 @@ import React from "react";
 import "./CartDrawer.css";
 import { useCart } from '../../context/CartContext';
 import { Trash } from '@phosphor-icons/react';
+import product1 from '../../assets/product1.png';
+import product2 from '../../assets/product2.png';
+import product3 from '../../assets/product3.png';
+import product4 from '../../assets/product4.png';
+import product5 from '../../assets/product5.png';
 
 export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
   const { cartItems, updateQuantity, calculateTotals, removeFromCart } = useCart();
   const totals = calculateTotals();
+  
+  // Local product images
+  const localProductImages = [product1, product2, product3, product4, product5];
 
   if (!isOpen) return null;
 
@@ -77,11 +85,16 @@ export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
           {cartItems.map((item) => {
             const itemTotalPrice = item.price * item.qty;
             const itemTotalMRP = item.mrp * item.qty;
+            // Get product image based on productId
+            const productId = item.productId || item.id;
+            const imageIndex = (parseInt(productId) - 1) % localProductImages.length;
+            const productImage = localProductImages[imageIndex];
+            
             return (
               <div className="cart-item" key={item.id}>
                 <div className="cart-item-left">
                   <img
-                    src={item.thumbnailUrl || 'placeholder.png'}
+                    src={productImage}
                     alt={item.productName}
                     className="cart-item-image"
                   />
