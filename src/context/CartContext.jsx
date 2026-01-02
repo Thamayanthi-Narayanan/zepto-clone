@@ -361,6 +361,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     calculateTotals,
+    fetchCartItems,
     showToast,
     toastMessage,
     hideToast,

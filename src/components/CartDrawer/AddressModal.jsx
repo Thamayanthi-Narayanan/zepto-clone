@@ -3,6 +3,11 @@ import './AddressModal.css';
 import { BASE_API_URL } from '../../api/apiConfig';
 
 export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [addressType, setAddressType] = useState('Home'); // Home, Work, Others
   const [buildingType, setBuildingType] = useState('Society'); // Society, Independent house, Standalone
   const [formData, setFormData] = useState({
@@ -19,9 +24,14 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
 
-  // Auto-fill receiver name and number from localStorage when modal opens
+  // Fetch saved addresses when modal opens
   useEffect(() => {
     if (isOpen) {
+      setShowAddForm(false);
+      setEditingAddressId(null);
+      setSelectedAddressId(null);
+      fetchSavedAddresses();
+      
       const userName = localStorage.getItem('userName') || '';
       const userPhoneNumber = localStorage.getItem('userPhoneNumber') || '';
       
@@ -42,6 +52,148 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
       setApiError('');
     }
   }, [isOpen]);
+
+  const fetchSavedAddresses = async () => {
+    const authToken = localStorage.getItem('authToken');
+    const userId = localStorage.getItem('userId');
+    
+    if (!authToken || !userId) {
+      // New user - show add form directly
+      setShowAddForm(true);
+      return;
+    }
+
+    setLoadingAddresses(true);
+
+    try {
+      const GET_ADDRESSES_URL = BASE_API_URL + `/api/address/${userId}`;
+      console.log("Fetching saved addresses - URL:", GET_ADDRESSES_URL);
+
+      const response = await fetch(GET_ADDRESSES_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          setShowAddForm(true);
+        } else if (response.status === 404) {
+          // No addresses found - show add form
+          setSavedAddresses([]);
+          setShowAddForm(true);
+        } else {
+          // Other errors - show add form as fallback
+          setShowAddForm(true);
+        }
+        setLoadingAddresses(false);
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data && Array.isArray(result.data)) {
+        console.log("Saved addresses fetched:", result.data);
+        setSavedAddresses(result.data);
+        // If addresses exist, show selection view; otherwise show add form
+        if (result.data.length > 0) {
+          setShowAddForm(false);
+          // Auto-select default address if exists
+          const defaultAddress = result.data.find(addr => addr.defaultAddress);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.addressId);
+          }
+        } else {
+          setShowAddForm(true);
+        }
+      } else {
+        setSavedAddresses([]);
+        setShowAddForm(true);
+      }
+    } catch (err) {
+      console.error("Error fetching saved addresses:", err);
+      setSavedAddresses([]);
+      setShowAddForm(true);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  const handleSelectAddress = (addressId) => {
+    setSelectedAddressId(addressId);
+  };
+
+  const handleUseSelectedAddress = () => {
+    if (!selectedAddressId) {
+      setApiError('Please select an address');
+      return;
+    }
+
+    const selectedAddress = savedAddresses.find(addr => addr.addressId === selectedAddressId);
+    if (selectedAddress && onSaveAddress) {
+      // Store selected address and proceed
+      localStorage.setItem('selectedAddress', JSON.stringify(selectedAddress));
+      onClose();
+      onSaveAddress();
+    }
+  };
+
+  const handleAddNewAddress = () => {
+    setShowAddForm(true);
+    setEditingAddressId(null);
+    setSelectedAddressId(null);
+    // Reset form
+    const userName = localStorage.getItem('userName') || '';
+    const userPhoneNumber = localStorage.getItem('userPhoneNumber') || '';
+    setFormData({
+      flatNo: '',
+      buildingName: '',
+      landmark: '',
+      receiverName: userName,
+      receiverNumber: userPhoneNumber,
+      city: '',
+      state: '',
+      pincode: ''
+    });
+    setAddressType('Home');
+    setBuildingType('Society');
+    setErrors({});
+    setApiError('');
+  };
+
+  const handleEditAddress = (address) => {
+    setEditingAddressId(address.addressId);
+    setShowAddForm(true);
+    setSelectedAddressId(null);
+    
+    // Map API addressType to form format
+    const addressTypeMap = {
+      'HOME': 'Home',
+      'WORK': 'Work',
+      'OTHERS': 'Others'
+    };
+    
+    // Pre-fill form with existing address data
+    setFormData({
+      flatNo: address.addressLine1 || '',
+      buildingName: address.addressLine2 || '',
+      landmark: address.landmark || '',
+      receiverName: localStorage.getItem('userName') || '',
+      receiverNumber: localStorage.getItem('userPhoneNumber') || '',
+      city: address.city || '',
+      state: address.state || '',
+      pincode: address.pincode || ''
+    });
+    
+    setAddressType(addressTypeMap[address.addressType] || 'Home');
+    setBuildingType('Society'); // Default, as this isn't stored in API
+    setErrors({});
+    setApiError('');
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -142,15 +294,28 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
         state: formData.state.trim(),
         pincode: formData.pincode.trim(),
         addressType: addressTypeMap[addressType] || 'HOME',
-        defaultAddress: true
+        defaultAddress: editingAddressId ? false : true // Don't change default when editing
       };
 
-      const ADD_ADDRESS_URL = BASE_API_URL + "/api/address/add";
-      console.log("Adding address - URL:", ADD_ADDRESS_URL);
+      let API_URL;
+      let method;
+      
+      if (editingAddressId) {
+        // Update existing address
+        API_URL = BASE_API_URL + `/api/address/update/${editingAddressId}`;
+        method = "PUT";
+        console.log("Updating address - URL:", API_URL);
+      } else {
+        // Add new address
+        API_URL = BASE_API_URL + "/api/address/add";
+        method = "POST";
+        console.log("Adding address - URL:", API_URL);
+      }
+      
       console.log("Request body:", requestBody);
 
-      const response = await fetch(ADD_ADDRESS_URL, {
-        method: "POST",
+      const response = await fetch(API_URL, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
@@ -174,7 +339,7 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
         } else if (response.status === 400) {
           setApiError(errorData.message || 'Invalid address data. Please check all fields.');
         } else {
-          setApiError(errorData.message || 'Failed to save address. Please try again.');
+          setApiError(errorData.message || `Failed to ${editingAddressId ? 'update' : 'save'} address. Please try again.`);
         }
         setLoading(false);
         return;
@@ -183,15 +348,37 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
       const result = await response.json();
 
       if (result.success) {
-        console.log("Address added successfully:", result.data);
-        // Close address modal and open payment modal
-        setLoading(false);
-        onClose();
-        if (onSaveAddress) {
+        console.log(`Address ${editingAddressId ? 'updated' : 'added'} successfully:`, result.data);
+        
+        // Handle response structure: ADD returns 'id', GET returns 'addressId'
+        // Normalize to 'addressId' for consistency
+        let normalizedAddress = { ...result.data };
+        if (normalizedAddress.id && !normalizedAddress.addressId) {
+          normalizedAddress.addressId = normalizedAddress.id;
+        }
+        
+        // Refresh addresses list
+        await fetchSavedAddresses();
+        
+        // If editing, use the updated address; if adding, use the new address
+        const addressToStore = normalizedAddress || savedAddresses.find(addr => addr.addressId === editingAddressId);
+        if (addressToStore) {
+          localStorage.setItem('selectedAddress', JSON.stringify(addressToStore));
+        }
+        
+        // If this was called from checkout flow, proceed to payment
+        if (onSaveAddress && !editingAddressId) {
+          setLoading(false);
+          onClose();
           onSaveAddress();
+        } else {
+          // If editing, go back to address selection
+          setLoading(false);
+          setShowAddForm(false);
+          setEditingAddressId(null);
         }
       } else {
-        setApiError(result.message || 'Failed to save address. Please try again.');
+        setApiError(result.message || `Failed to ${editingAddressId ? 'update' : 'save'} address. Please try again.`);
         setLoading(false);
       }
     } catch (err) {
@@ -203,12 +390,122 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
 
   if (!isOpen) return null;
 
+  // Address Selection View
+  if (!showAddForm) {
+    return (
+      <div className="address-modal-overlay" onClick={onClose}>
+        <div className="address-modal-content" onClick={(e) => e.stopPropagation()}>
+          <button className="address-modal-close" onClick={onClose}>&times;</button>
+          
+          <h2 className="address-modal-title">Select Delivery Address</h2>
+          
+          <div className="address-modal-scrollable">
+            {loadingAddresses ? (
+              <div className="address-loading">Loading addresses...</div>
+            ) : savedAddresses.length > 0 ? (
+              <>
+                {savedAddresses.map((address) => {
+                  const addressTypeIcon = {
+                    'HOME': '🏠',
+                    'WORK': '🏢',
+                    'OTHERS': '📍'
+                  };
+                  const isSelected = selectedAddressId === address.addressId;
+                  
+                  return (
+                    <div
+                      key={address.addressId}
+                      className={`address-card ${isSelected ? 'selected' : ''}`}
+                    >
+                      <div 
+                        className="address-card-clickable"
+                        onClick={() => handleSelectAddress(address.addressId)}
+                      >
+                        <div className="address-card-header">
+                          <span className="address-card-icon">{addressTypeIcon[address.addressType] || '📍'}</span>
+                          <span className="address-card-type">{address.addressType}</span>
+                          {address.defaultAddress && (
+                            <span className="address-card-default">Default</span>
+                          )}
+                        </div>
+                        <div className="address-card-body">
+                          <div className="address-card-line">{address.addressLine1}</div>
+                          <div className="address-card-line">{address.addressLine2}</div>
+                          {address.landmark && (
+                            <div className="address-card-line">Near {address.landmark}</div>
+                          )}
+                          <div className="address-card-line">
+                            {address.city}, {address.state} - {address.pincode}
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <div className="address-card-check">✓</div>
+                        )}
+                      </div>
+                      <button
+                        className="address-card-edit-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditAddress(address);
+                        }}
+                        title="Edit address"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  );
+                })}
+                
+                <button className="address-add-new-btn" onClick={handleAddNewAddress}>
+                  <span className="address-add-icon">+</span>
+                  Add New Address
+                </button>
+              </>
+            ) : (
+              <div className="address-empty-state">
+                <div className="address-empty-icon">📍</div>
+                <p className="address-empty-text">No saved addresses</p>
+                <button className="address-add-new-btn" onClick={handleAddNewAddress}>
+                  <span className="address-add-icon">+</span>
+                  Add Address
+                </button>
+              </div>
+            )}
+          </div>
+
+          {savedAddresses.length > 0 && (
+            <div className="address-modal-footer">
+              {apiError && <div className="address-api-error">{apiError}</div>}
+              <button 
+                className="address-save-btn" 
+                onClick={handleUseSelectedAddress}
+                disabled={!selectedAddressId}
+              >
+                Use Selected Address
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Add Address Form View
   return (
     <div className="address-modal-overlay" onClick={onClose}>
       <div className="address-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="address-modal-close" onClick={onClose}>&times;</button>
+        <button className="address-back-btn" onClick={() => {
+          setShowAddForm(false);
+          setEditingAddressId(null);
+          fetchSavedAddresses();
+        }}>
+          ← Back
+        </button>
         
-        <h2 className="address-modal-title">Add Address Details</h2>
+        <h2 className="address-modal-title">
+          {editingAddressId ? 'Edit Address Details' : 'Add Address Details'}
+        </h2>
         
         <div className="address-modal-scrollable">
           {/* Save Address as */}
@@ -406,7 +703,7 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
               !formData.pincode.trim()
             }
           >
-            {loading ? 'Saving...' : 'Save Address'}
+            {loading ? (editingAddressId ? 'Updating...' : 'Saving...') : (editingAddressId ? 'Update Address' : 'Save Address')}
           </button>
         </div>
       </div>

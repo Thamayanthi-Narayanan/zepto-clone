@@ -48,11 +48,27 @@
   width: 32px;
   height: 32px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
   z-index: 10;
+}
+
+.address-back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+}
+
+.address-back-btn:hover {
+  color: #ff6b9d;
 }
 
 .address-modal-close:hover {
@@ -244,6 +260,179 @@
   text-align: center;
 }
 
+/* Address Selection View Styles */
+.address-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.address-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.address-card:hover {
+  border-color: #ff6b9d;
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.15);
+  transform: translateY(-2px);
+}
+
+.address-card.selected {
+  border-color: #ff6b9d;
+  background: #fff7fa;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.2);
+}
+
+.address-card-clickable {
+  padding: 16px;
+  padding-right: 50px;
+  cursor: pointer;
+}
+
+.address-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.address-card-icon {
+  font-size: 20px;
+}
+
+.address-card-type {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  text-transform: capitalize;
+}
+
+.address-card-default {
+  font-size: 11px;
+  font-weight: 500;
+  color: #ff6b9d;
+  background: #fff7fa;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+.address-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.address-card-line {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.address-card-check {
+  position: absolute;
+  top: 16px;
+  right: 70px;
+  width: 24px;
+  height: 24px;
+  background: #ff6b9d;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.address-card-edit-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.address-card-edit-btn:hover {
+  background: #ff6b9d;
+  transform: scale(1.1);
+}
+
+.address-card-edit-btn:active {
+  transform: scale(0.95);
+}
+
+.address-add-new-btn {
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  color: #ff6b9d;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.address-add-new-btn:hover {
+  border-color: #ff6b9d;
+  background: #fff7fa;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.15);
+}
+
+.address-add-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.address-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.address-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.address-empty-text {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
 .address-modal-footer {
   padding: 20px 24px;
   border-top: 1px solid #f0f0f0;
@@ -277,6 +466,19 @@
 .address-save-btn:focus,
 .address-save-btn:active {
   outline: none;
+}
+
+.address-save-btn:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.address-save-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .address-save-btn:disabled {
