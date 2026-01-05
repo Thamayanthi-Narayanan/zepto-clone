@@ -316,6 +316,20 @@
   outline: none;
 }
 
+.add-to-cart-btn.disabled,
+.add-to-cart-btn:disabled {
+  background-color: #e5e7eb;
+  color: #000000;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-to-cart-btn.disabled:hover,
+.add-to-cart-btn:disabled:hover {
+  background-color: #e5e7eb;
+  color: #000000;
+}
+
 /* Coupons & Offers Section */
 .coupons-offers-section {
   border-top: 1px solid #e5e7eb;

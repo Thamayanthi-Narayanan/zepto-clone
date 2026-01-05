@@ -155,7 +155,7 @@ export const CartProvider = ({ children }) => {
       console.log("Auth Token:", authToken ? `${authToken.substring(0, 20)}...` : 'No token');
       
       const response = await fetch(ADD_TO_CART_URL, {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
@@ -190,7 +190,13 @@ export const CartProvider = ({ children }) => {
           // 404 could mean endpoint not found or product not found
           const errorMsg = errorData.error || errorData.message || 'Endpoint or product not found';
           console.error("404 Error - Path:", errorData.path, "Error:", errorMsg);
-          setToastMessage(`Cart endpoint not found. Please check the API configuration.`);
+          setToastMessage(errorData.message || 'Product not found');
+          setShowToast(true);
+          return;
+        } else if (response.status === 500) {
+          // 500 Internal Server Error
+          console.error("500 Error - Full error data:", errorData);
+          setToastMessage(errorData.message || "Internal server error. Please try again later.");
           setShowToast(true);
           return;
         } else {

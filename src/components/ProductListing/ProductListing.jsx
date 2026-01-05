@@ -10,7 +10,7 @@ import product4 from '../../assets/product4.png';
 import product5 from '../../assets/product5.png';
 
 export default function ProductListing() {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
@@ -78,11 +78,25 @@ export default function ProductListing() {
           // Get image based on product index (cycle through if more than 5 products)
           const productImage = productImages[index % productImages.length];
 
+          // Check if product is in cart
+          const isInCart = cartItems.some(item => item.id === product.id);
+
           return (
           <div className="product-card" key={product.id} onClick={() => navigate(`/product/${product.id}`)}>
             <div className="product-image-container">
               <img src={productImage} alt={product.productName} className="product-image" />
-              <button className="add-button" onClick={(e) => { e.stopPropagation(); addToCart(product); }}>ADD</button>
+              <button 
+                className={`add-button ${isInCart ? 'disabled' : ''}`} 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if (!isInCart) {
+                    addToCart(product); 
+                  }
+                }}
+                disabled={isInCart}
+              >
+                {isInCart ? 'ADDED' : 'ADD'}
+              </button>
             </div>
             <div className="product-details">
               <div className="price-and-mrp">

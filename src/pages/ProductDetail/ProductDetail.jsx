@@ -12,7 +12,7 @@ import product5 from '../../assets/product5.png';
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,6 +70,9 @@ export default function ProductDetail() {
       addToCart(product);
     }
   };
+
+  // Check if product is in cart
+  const isInCart = product ? cartItems.some(item => item.id === product.id) : false;
 
   // Loading state
   if (loading) {
@@ -229,8 +232,12 @@ export default function ProductDetail() {
           </div>
 
           <div className="product-actions">
-            <button className="add-to-cart-btn" onClick={handleAddToCart}>
-              Add to Cart
+            <button 
+              className={`add-to-cart-btn ${isInCart ? 'disabled' : ''}`} 
+              onClick={handleAddToCart}
+              disabled={isInCart}
+            >
+              {isInCart ? 'Added to Cart' : 'Add to Cart'}
             </button>
           </div>
         </div>

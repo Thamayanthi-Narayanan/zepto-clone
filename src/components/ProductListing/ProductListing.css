@@ -69,6 +69,22 @@
   border-color: #f73859;
 }
 
+.add-button.disabled,
+.add-button:disabled {
+  background-color: #e5e7eb;
+  color: #000000;
+  border-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-button.disabled:hover,
+.add-button:disabled:hover {
+  background-color: #e5e7eb;
+  color: #000000;
+  border-color: #d1d5db;
+}
+
 .product-price-pill {
   background-color: #008000;
   color: white;

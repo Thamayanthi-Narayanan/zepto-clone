@@ -8,8 +8,8 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [loadingAddresses, setLoadingAddresses] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [addressType, setAddressType] = useState('Home'); // Home, Work, Others
-  const [buildingType, setBuildingType] = useState('Society'); // Society, Independent house, Standalone
+  const [addressType, setAddressType] = useState('Home'); 
+  const [buildingType, setBuildingType] = useState('Society'); 
   const [formData, setFormData] = useState({
     flatNo: '',
     buildingName: '',
@@ -35,7 +35,6 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
       const userName = localStorage.getItem('userName') || '';
       const userPhoneNumber = localStorage.getItem('userPhoneNumber') || '';
       
-      // Reset form data but keep receiver name and number
       setFormData({
         flatNo: '',
         buildingName: '',
@@ -47,7 +46,6 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
         pincode: ''
       });
       
-      // Clear errors and API error when modal opens
       setErrors({});
       setApiError('');
     }
@@ -277,38 +275,46 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
     setApiError('');
 
     try {
-      // Map addressType to API format (HOME, WORK, OTHERS)
       const addressTypeMap = {
         'Home': 'HOME',
         'Work': 'WORK',
         'Others': 'OTHERS'
       };
 
-      const requestBody = {
-        name: formData.receiverName.trim() || localStorage.getItem('userName') || '',
-        mobileNumber: formData.receiverNumber.trim() || localStorage.getItem('userPhoneNumber') || '',
-        addressLine1: formData.flatNo.trim(),
-        addressLine2: formData.buildingName.trim(),
-        landmark: formData.landmark.trim(),
-        city: formData.city.trim(),
-        state: formData.state.trim(),
-        pincode: formData.pincode.trim(),
-        addressType: addressTypeMap[addressType] || 'HOME',
-        defaultAddress: editingAddressId ? false : true // Don't change default when editing
-      };
-
       let API_URL;
       let method;
+      let requestBody;
       
       if (editingAddressId) {
-        // Update existing address
-        API_URL = BASE_API_URL + `/api/address/update/${editingAddressId}`;
+        API_URL = BASE_API_URL + `/api/address/${editingAddressId}`;
         method = "PUT";
+        requestBody = {
+          addressLine1: formData.flatNo.trim(),
+          addressLine2: formData.buildingName.trim(),
+          landmark: formData.landmark.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          pincode: formData.pincode.trim(),
+          addressType: addressTypeMap[addressType] || 'HOME',
+          defaultAddress: true 
+        };
         console.log("Updating address - URL:", API_URL);
       } else {
         // Add new address
         API_URL = BASE_API_URL + "/api/address/add";
         method = "POST";
+        requestBody = {
+          name: formData.receiverName.trim() || localStorage.getItem('userName') || '',
+          mobileNumber: formData.receiverNumber.trim() || localStorage.getItem('userPhoneNumber') || '',
+          addressLine1: formData.flatNo.trim(),
+          addressLine2: formData.buildingName.trim(),
+          landmark: formData.landmark.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          pincode: formData.pincode.trim(),
+          addressType: addressTypeMap[addressType] || 'HOME',
+          defaultAddress: true
+        };
         console.log("Adding address - URL:", API_URL);
       }
       
@@ -334,10 +340,12 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
         }
 
         if (response.status === 401) {
-          setApiError('Please login to save address');
+          setApiError(errorData.message || 'Authentication token required');
           localStorage.removeItem('authToken');
         } else if (response.status === 400) {
           setApiError(errorData.message || 'Invalid address data. Please check all fields.');
+        } else if (response.status === 500) {
+          setApiError(errorData.message || 'Internal server error. Please try again later.');
         } else {
           setApiError(errorData.message || `Failed to ${editingAddressId ? 'update' : 'save'} address. Please try again.`);
         }
@@ -350,8 +358,6 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
       if (result.success) {
         console.log(`Address ${editingAddressId ? 'updated' : 'added'} successfully:`, result.data);
         
-        // Handle response structure: ADD returns 'id', GET returns 'addressId'
-        // Normalize to 'addressId' for consistency
         let normalizedAddress = { ...result.data };
         if (normalizedAddress.id && !normalizedAddress.addressId) {
           normalizedAddress.addressId = normalizedAddress.id;
@@ -366,13 +372,11 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
           localStorage.setItem('selectedAddress', JSON.stringify(addressToStore));
         }
         
-        // If this was called from checkout flow, proceed to payment
         if (onSaveAddress && !editingAddressId) {
           setLoading(false);
           onClose();
           onSaveAddress();
         } else {
-          // If editing, go back to address selection
           setLoading(false);
           setShowAddForm(false);
           setEditingAddressId(null);
