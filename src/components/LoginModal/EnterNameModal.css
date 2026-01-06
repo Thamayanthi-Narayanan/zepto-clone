@@ -58,6 +58,7 @@
 .enter-name-close:focus,
 .enter-name-close:active {
   outline: none;
+  border: none;
 }
 
 .enter-name-content {
@@ -77,8 +78,6 @@
 
 .enter-name-input-container {
   width: 100%;
-  background-color: white;
-  color: white;
 }
 
 .enter-name-input {

@@ -8,6 +8,21 @@ import product2 from '../../assets/product2.png';
 import product3 from '../../assets/product3.png';
 import product4 from '../../assets/product4.png';
 import product5 from '../../assets/product5.png';
+import product6 from '../../assets/product6.png.png';
+import product7 from '../../assets/product7.png.png';
+import product8 from '../../assets/product8.png.png';
+import product9 from '../../assets/product9.png.png';
+import product10 from '../../assets/product10.png.png';
+import product11 from '../../assets/product11.png.png';
+import product12 from '../../assets/product12.png.png';
+import product13 from '../../assets/product13.png.png';
+import product14 from '../../assets/product14.png.png';
+import product15 from '../../assets/product15.png.png';
+import product16 from '../../assets/product16.png.png';
+import product17 from '../../assets/product17.png.png';
+import product18 from '../../assets/product18.png.png';
+import product19 from '../../assets/product19.png.png';
+import product20 from '../../assets/product20.png.png';
 
 export default function ProductListing() {
   const { addToCart, cartItems } = useCart();
@@ -60,8 +75,13 @@ export default function ProductListing() {
     return <section className="product-listing-section">Error: {error}</section>;
   }
 
-  // Array of product images
-  const productImages = [product1, product2, product3, product4, product5];
+  // Array of product images (product1 to product20)
+  const productImages = [
+    product1, product2, product3, product4, product5,
+    product6, product7, product8, product9, product10,
+    product11, product12, product13, product14, product15,
+    product16, product17, product18, product19, product20
+  ];
 
   return (
     <section className="product-listing-section">
@@ -75,8 +95,10 @@ export default function ProductListing() {
             ? Math.round(product.mrp - product.price)
             : null;
 
-          // Get image based on product index (cycle through if more than 5 products)
-          const productImage = productImages[index % productImages.length];
+          // Get image based on product ID (use product ID directly, fallback to index)
+          const productId = product.id || (index + 1);
+          const imageIndex = (parseInt(productId) - 1) % productImages.length;
+          const productImage = productImages[imageIndex] || product1;
 
           // Check if product is in cart
           const isInCart = cartItems.some(item => item.id === product.id);

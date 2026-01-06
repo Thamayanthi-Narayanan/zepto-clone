@@ -4,6 +4,7 @@ import './ProfileModal.css';
 import { ShoppingBag, ChatCircle, Heart, MapPin, User, SignOut, Trash } from '@phosphor-icons/react';
 import { BASE_API_URL } from '../../api/apiConfig';
 import { useCart } from '../../context/CartContext';
+import OrdersHistory from './OrdersHistory';
 
 export default function ProfileModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -424,7 +425,12 @@ export default function ProfileModal({ isOpen, onClose }) {
 
           {/* Right Content Area */}
           <div className="profile-content-area">
-            {/* Empty for now - content will be added later */}
+            {activeTab === 'Orders' && <OrdersHistory />}
+            {activeTab !== 'Orders' && (
+              <div className="profile-empty-content">
+                <p>{activeTab} content coming soon...</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

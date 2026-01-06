@@ -67,10 +67,17 @@
   align-items: center;
   gap: 4px;
   z-index: 10;
+  outline: none;
 }
 
 .address-back-btn:hover {
   color: #ff6b9d;
+}
+
+.address-back-btn:focus,
+.address-back-btn:active {
+  outline: none;
+  border: none;
 }
 
 .address-modal-close:hover {
@@ -139,6 +146,8 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background: white;
+  outline: none;
+  cursor: pointer;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 12px;
@@ -155,6 +164,18 @@
   background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
   border-color: #f73859;
   color: white;
+}
+
+.address-option-btn:focus,
+.address-option-btn:active {
+  outline: none;
+  border: 1px solid #e0e0e0;
+}
+
+.address-option-btn.active:focus,
+.address-option-btn.active:active {
+  outline: none;
+  border-color: #f73859;
 }
 
 .address-option-icon {
@@ -394,6 +415,7 @@
   font-weight: 600;
   cursor: pointer;
   display: flex;
+  outline: none;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -406,6 +428,17 @@
   background: #fff7fa;
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(255, 107, 157, 0.15);
+}
+
+.address-add-new-btn:focus,
+.address-add-new-btn:active {
+  outline: none;
+  border: 2px dashed #d1d5db;
+}
+
+.address-add-new-btn:hover:focus,
+.address-add-new-btn:hover:active {
+  border-color: #ff6b9d;
 }
 
 .address-add-icon {
@@ -444,20 +477,18 @@
 .address-save-btn {
   width: 100%;
   padding: 14px 24px;
-  background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+  background: #f73859;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+  transition: background-color 0.2s;
 }
 
-.address-save-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+.address-save-btn:hover:not(:disabled) {
+  background: #e02d4a;
 }
 
 .address-save-btn:active {
@@ -473,25 +504,10 @@
   background: #e5e7eb;
   color: #9ca3af;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .address-save-btn:disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.address-save-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.address-save-btn:disabled:hover {
-  transform: none;
-  box-shadow: none;
+  background: #e5e7eb;
 }
 
 

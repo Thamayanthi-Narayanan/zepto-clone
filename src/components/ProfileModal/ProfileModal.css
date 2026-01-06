@@ -278,18 +278,28 @@
 /* Right Content Area */
 .profile-content-area {
   width: 75%; /* 75% width */
-  background: white; /* White background */
+  background: #f8f9fa; /* Light grey background to match orders */
   border: none; /* No border - attached to left */
   border-top-left-radius: 0; /* Straight edge on left */
   border-bottom-left-radius: 0; /* Straight edge on left */
   border-top-right-radius: 12px; /* Rounded only on outer right top */
   border-bottom-right-radius: 12px; /* Rounded only on outer right bottom */
-  padding: 24px;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   flex-shrink: 0;
+}
+
+.profile-empty-content {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  font-size: 16px;
+  background: white;
 }
 
 .profile-content-area::-webkit-scrollbar {

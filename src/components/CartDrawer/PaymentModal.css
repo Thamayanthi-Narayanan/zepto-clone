@@ -287,7 +287,7 @@
 .payment-proceed-btn {
   width: 100%;
   padding: 16px 24px;
-  background: #ff6b9d;
+  background: #f73859;
   color: white;
   border: none;
   border-radius: 8px;
@@ -299,9 +299,9 @@
 }
 
 .payment-proceed-btn:hover:not(:disabled) {
-  background: #ff5a8a;
+  background: #e02d4a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+  box-shadow: 0 4px 12px rgba(247, 56, 89, 0.4);
 }
 
 .payment-proceed-btn:active:not(:disabled) {

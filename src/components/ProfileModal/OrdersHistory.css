@@ -1,0 +1,290 @@
+.orders-history-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+}
+
+.orders-history-container::-webkit-scrollbar {
+  display: none;
+}
+
+.orders-loading,
+.orders-error,
+.orders-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.orders-list {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.order-status-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon {
+  flex-shrink: 0;
+}
+
+.cancelled-icon {
+  color: #9ca3af;
+}
+
+.delivered-icon {
+  color: #22c55e;
+}
+
+.order-status-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.order-price-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.order-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.order-menu-btn:hover {
+  color: #111827;
+}
+
+.order-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: -4px;
+}
+
+.order-products {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.order-product-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.order-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.order-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.order-again-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: #f73859;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.order-again-btn:hover {
+  background: #e02d4a;
+}
+
+.order-again-btn:focus,
+.order-again-btn:active {
+  outline: none;
+  border: none;
+}
+
+.rate-order-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: white;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.rate-order-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.rate-order-btn:focus,
+.rate-order-btn:active {
+  outline: none;
+  border: 1px solid #e5e7eb;
+}
+
+/* Bottom Offer Banner */
+.orders-offer-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #374151;
+  padding: 16px 20px;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.offer-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 100%;
+}
+
+.offer-icon {
+  color: white;
+  flex-shrink: 0;
+}
+
+.offer-text-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.offer-main-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.offer-sub-text {
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.offers-btn {
+  background: #f73859;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.offers-btn:hover {
+  background: #e02d4a;
+}
+
+.offers-arrow {
+  font-size: 12px;
+  transform: rotate(180deg);
+  display: inline-block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .orders-list {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .order-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .order-product-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .orders-offer-banner {
+    padding: 12px 16px;
+  }
+
+  .offer-main-text {
+    font-size: 14px;
+  }
+
+  .offer-sub-text {
+    font-size: 11px;
+  }
+
+  .offers-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+

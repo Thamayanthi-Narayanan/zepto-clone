@@ -340,6 +340,12 @@
   transform: translateY(0);
 }
 
+.success-close-btn:focus,
+.success-close-btn:active {
+  outline: none;
+  border: none;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .order-success-container {

@@ -7,9 +7,11 @@ import CartDrawer from "../CartDrawer/CartDrawer";
 import AddressModal from "../CartDrawer/AddressModal";
 import PaymentModal from "../CartDrawer/PaymentModal";
 import ProfileModal from "../ProfileModal/ProfileModal";
+import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { cartItems } = useCart();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
@@ -17,6 +19,9 @@ export default function Navbar() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [scrollYBeforeLock, setScrollYBeforeLock] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Calculate total cart quantity
+  const cartQuantity = cartItems.reduce((total, item) => total + (item.qty || 1), 0);
 
   // Check if user is logged in on mount and when login state changes
   useEffect(() => {
@@ -181,7 +186,12 @@ export default function Navbar() {
         <button className="nav-login" onClick={handleLoginClick}>
           {isLoggedIn ? 'Profile' : 'Login'}
         </button>
-        <button className="nav-cart" onClick={handleCartClick}>Cart</button>
+        <button className="nav-cart" onClick={handleCartClick}>
+          Cart
+          {cartQuantity > 0 && (
+            <span className="cart-badge">{cartQuantity}</span>
+          )}
+        </button>
       </div>
       <LoginModal isOpen={isLoginModalOpen} onClose={handleCloseModal} />
       <CartDrawer 
