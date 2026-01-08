@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './ProductListing.css';
 import { BASE_API_URL } from "../../api/apiConfig";
 import { useCart } from '../../context/CartContext';
+import Loader from '../Loader/Loader';
 import product1 from '../../assets/product1.png';
 import product2 from '../../assets/product2.png';
 import product3 from '../../assets/product3.png';
@@ -25,7 +26,7 @@ import product19 from '../../assets/product19.png.png';
 import product20 from '../../assets/product20.png.png';
 
 export default function ProductListing() {
-  const { addToCart, cartItems } = useCart();
+  const { addToCart, cartItems, updateQuantity } = useCart();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
@@ -68,7 +69,11 @@ export default function ProductListing() {
   }, []);
 
   if (loading) {
-    return <section className="product-listing-section">Loading products...</section>;
+    return (
+      <section className="product-listing-section">
+        <Loader size="medium" />
+      </section>
+    );
   }
 
   if (error) {
@@ -100,25 +105,61 @@ export default function ProductListing() {
           const imageIndex = (parseInt(productId) - 1) % productImages.length;
           const productImage = productImages[imageIndex] || product1;
 
-          // Check if product is in cart
-          const isInCart = cartItems.some(item => item.id === product.id);
+          // Check if product is in cart and get quantity
+          const cartItem = cartItems.find(item => item.id === product.id);
+          const isInCart = !!cartItem;
+          const quantity = cartItem?.qty || 0;
+
+          // Handle quantity increase
+          const handleIncrease = (e) => {
+            e.stopPropagation();
+            if (isInCart) {
+              updateQuantity(product.id, quantity + 1);
+            } else {
+              addToCart(product);
+            }
+          };
+
+          // Handle quantity decrease
+          const handleDecrease = (e) => {
+            e.stopPropagation();
+            if (quantity > 1) {
+              updateQuantity(product.id, quantity - 1);
+            } else if (quantity === 1) {
+              updateQuantity(product.id, 0); // This will remove from cart
+            }
+          };
 
           return (
           <div className="product-card" key={product.id} onClick={() => navigate(`/product/${product.id}`)}>
             <div className="product-image-container">
               <img src={productImage} alt={product.productName} className="product-image" />
-              <button 
-                className={`add-button ${isInCart ? 'disabled' : ''}`} 
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  if (!isInCart) {
-                    addToCart(product); 
-                  }
-                }}
-                disabled={isInCart}
-              >
-                {isInCart ? 'ADDED' : 'ADD'}
-              </button>
+              {isInCart && quantity > 0 ? (
+                <div className="quantity-selector" onClick={(e) => e.stopPropagation()}>
+                  <button 
+                    className="qty-btn qty-decrease" 
+                    onClick={handleDecrease}
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <span className="qty-value">{quantity}</span>
+                  <button 
+                    className="qty-btn qty-increase" 
+                    onClick={handleIncrease}
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  className="add-button" 
+                  onClick={handleIncrease}
+                >
+                  ADD
+                </button>
+              )}
             </div>
             <div className="product-details">
               <div className="price-and-mrp">

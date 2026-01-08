@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './OrdersHistory.css';
 import { X, CheckCircle, DotsThreeVertical, MagnifyingGlass } from '@phosphor-icons/react';
 import { BASE_API_URL } from '../../api/apiConfig';
+import Loader from '../Loader/Loader';
 import product1 from '../../assets/product1.png';
 import product2 from '../../assets/product2.png';
 import product3 from '../../assets/product3.png';
@@ -352,7 +353,7 @@ export default function OrdersHistory() {
   if (loading) {
     return (
       <div className="orders-history-container">
-        <div className="orders-loading">Loading orders...</div>
+        <Loader size="medium" />
       </div>
     );
   }

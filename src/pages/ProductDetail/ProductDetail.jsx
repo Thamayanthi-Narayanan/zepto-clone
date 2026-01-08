@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './ProductDetail.css';
 import { useCart } from '../../context/CartContext';
 import { BASE_API_URL } from '../../api/apiConfig';
+import Loader from '../../components/Loader/Loader';
 import product1 from '../../assets/product1.png';
 import product2 from '../../assets/product2.png';
 import product3 from '../../assets/product3.png';
@@ -93,9 +94,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <div className="product-detail-page">
-        <div className="product-detail-loading">
-          <p>Loading product details...</p>
-        </div>
+        <Loader size="medium" />
       </div>
     );
   }

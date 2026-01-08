@@ -85,6 +85,50 @@
   border-color: #d1d5db;
 }
 
+/* Quantity Selector - matches cart drawer style */
+.quantity-selector {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid #ffd1e1;
+  background-color: #fff7fa;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.qty-btn {
+  border: none;
+  background-color: transparent;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  color: #ff4b85;
+  pointer-events: auto;
+}
+
+.qty-btn:focus,
+.qty-btn:active {
+  outline: none;
+}
+
+.qty-value {
+  padding: 0 8px;
+  font-size: 13px;
+  background-color: transparent;
+  color: #111827;
+  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+}
+
 .product-price-pill {
   background-color: #008000;
   color: white;
