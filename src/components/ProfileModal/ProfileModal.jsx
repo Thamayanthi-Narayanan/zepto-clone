@@ -255,9 +255,8 @@ export default function ProfileModal({ isOpen, onClose }) {
     const authToken = localStorage.getItem('authToken');
     
     if (!authToken) {
-      // No token, just clear all local storage and close
       clearAllLocalStorage();
-      window.dispatchEvent(new Event('userLoggedIn')); // Trigger logout event to update navbar
+      window.dispatchEvent(new Event('userLoggedIn')); 
       onClose();
       navigate('/');
       return;

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
-import { MagnifyingGlass, } from "@phosphor-icons/react"
+import { MagnifyingGlass, X } from "@phosphor-icons/react";
+import { BASE_API_URL } from "../../api/apiConfig";
 import LoginModal from "../LoginModal/LoginModal";
 import CartDrawer from "../CartDrawer/CartDrawer";
 import AddressModal from "../CartDrawer/AddressModal";
@@ -19,9 +20,43 @@ export default function Navbar() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [scrollYBeforeLock, setScrollYBeforeLock] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [products, setProducts] = useState([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchRef = useRef(null);
 
   // Calculate total cart quantity
   const cartQuantity = cartItems.reduce((total, item) => total + (item.qty || 1), 0);
+
+  // Fetch products for search
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const API_ENDPOINT = "/api/products/all";
+        const FULL_API_URL = BASE_API_URL + API_ENDPOINT;
+        
+        const response = await fetch(FULL_API_URL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            setProducts(result.data);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching products for search:", err);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Check if user is logged in on mount and when login state changes
   useEffect(() => {
@@ -41,6 +76,53 @@ export default function Navbar() {
     return () => {
       window.removeEventListener('userLoggedIn', checkLoginStatus);
       clearInterval(interval);
+    };
+  }, []);
+
+  // Debounce search term (wait 300ms after user stops typing)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Filter products based on search term (using useMemo for performance)
+  const filteredProducts = useMemo(() => {
+    if (!debouncedSearchTerm.trim()) {
+      return []; // Return empty if search is empty
+    }
+
+    const searchLower = debouncedSearchTerm.toLowerCase().trim();
+
+    return products.filter((product) => {
+      // Search in product name
+      if (product.productName?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in unit value/type
+      if (product.unitValue?.toLowerCase().includes(searchLower) ||
+          product.unitType?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      return false;
+    }).slice(0, 8); // Limit to 8 results for dropdown
+  }, [products, debouncedSearchTerm]);
+
+  // Close search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -158,6 +240,46 @@ export default function Navbar() {
     navigate('/');
   };
 
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setIsSearchFocused(true);
+  };
+
+  // Handle search input focus
+  const handleSearchFocus = () => {
+    if (debouncedSearchTerm) {
+      setIsSearchFocused(true);
+    }
+  };
+
+  // Handle product click in search results
+  const handleProductClick = (productId) => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+    setIsSearchFocused(false);
+    navigate(`/product/${productId}`);
+  };
+
+  // Clear search
+  const handleClearSearch = (e) => {
+    e.stopPropagation();
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+    setIsSearchFocused(false);
+  };
+
+  // Handle search submit (Enter key)
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter' && debouncedSearchTerm.trim()) {
+      // Navigate to product listing with search query
+      navigate(`/?search=${encodeURIComponent(debouncedSearchTerm)}`);
+      setSearchTerm('');
+      setDebouncedSearchTerm('');
+      setIsSearchFocused(false);
+    }
+  };
+
   console.log("Navbar rendering, isLoginModalOpen:", isLoginModalOpen);
 
   return (
@@ -173,12 +295,63 @@ export default function Navbar() {
       </div>
 
       {/* Center Search */}
-      <div className="nav-center">
-        <input
-          type="text"
-          placeholder="Search for items..."
-          className="nav-search"
-        />
+      <div className="nav-center" ref={searchRef}>
+        <div className="nav-search-wrapper">
+          <MagnifyingGlass size={20} className="nav-search-icon" />
+          <input
+            type="text"
+            placeholder="Search for items..."
+            className="nav-search"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onFocus={handleSearchFocus}
+            onKeyDown={handleSearchSubmit}
+          />
+          {searchTerm && (
+            <button
+              className="nav-search-clear"
+              onClick={handleClearSearch}
+              aria-label="Clear search"
+            >
+              <X size={16} weight="bold" />
+            </button>
+          )}
+          
+          {/* Search Results Dropdown */}
+          {isSearchFocused && debouncedSearchTerm && filteredProducts.length > 0 && (
+            <div className="search-dropdown">
+              <div className="search-dropdown-header">
+                <span>Search Results ({filteredProducts.length})</span>
+              </div>
+              <div className="search-dropdown-list">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="search-dropdown-item"
+                    onClick={() => handleProductClick(product.id)}
+                  >
+                    <div className="search-item-name">{product.productName}</div>
+                    <div className="search-item-details">
+                      <span className="search-item-price">₹{product.price}</span>
+                      {product.unitValue && (
+                        <span className="search-item-unit">{product.unitValue}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* No Results Message */}
+          {isSearchFocused && debouncedSearchTerm && filteredProducts.length === 0 && (
+            <div className="search-dropdown">
+              <div className="search-no-results">
+                No products found matching "{debouncedSearchTerm}"
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right Section */}

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './OrdersHistory.css';
-import { X, CheckCircle, DotsThreeVertical } from '@phosphor-icons/react';
+import { X, CheckCircle, DotsThreeVertical, MagnifyingGlass } from '@phosphor-icons/react';
 import { BASE_API_URL } from '../../api/apiConfig';
 import product1 from '../../assets/product1.png';
 import product2 from '../../assets/product2.png';
@@ -27,6 +27,8 @@ export default function OrdersHistory() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   // Product images array for mapping (product1 to product20)
   const productImages = [
@@ -221,8 +223,9 @@ export default function OrdersHistory() {
               formattedDate = formatDate(new Date());
             }
 
-            // Get product images (all items)
+            // Get product images and names (all items)
             let productImagesList = [];
+            let productNamesList = [];
             if (order.items && Array.isArray(order.items) && order.items.length > 0) {
               // Show all items
               productImagesList = order.items.map((item) => {
@@ -233,6 +236,11 @@ export default function OrdersHistory() {
                   image: productImages[imageIndex]
                 };
               });
+              
+              // Extract product names for search
+              productNamesList = order.items.map((item) => 
+                item.productName || item.name || ''
+              ).filter(name => name);
             }
 
             return {
@@ -243,6 +251,7 @@ export default function OrdersHistory() {
               date: formattedDate,
               price: order.billSummary?.grandTotal || 0,
               products: productImagesList,
+              productNames: productNamesList, // Add product names for search
             };
           });
 
@@ -261,6 +270,69 @@ export default function OrdersHistory() {
 
     fetchOrders();
   }, []);
+
+  // Debounce search term (wait 300ms after user stops typing)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Filter orders based on search term (using useMemo for performance)
+  const filteredOrders = useMemo(() => {
+    if (!debouncedSearchTerm.trim()) {
+      return orders; // Return all orders if search is empty
+    }
+
+    const searchLower = debouncedSearchTerm.toLowerCase().trim();
+
+    return orders.filter((order) => {
+      // Search in orderId
+      if (order.orderId?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in date
+      if (order.date?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in price
+      if (order.price?.toString().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in status text
+      if (order.statusText?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in product names
+      if (order.productNames && order.productNames.length > 0) {
+        const hasMatchingProduct = order.productNames.some(name =>
+          name.toLowerCase().includes(searchLower)
+        );
+        if (hasMatchingProduct) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
+  }, [orders, debouncedSearchTerm]);
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+  };
 
   const handleOrderAgain = (orderId) => {
     console.log('Order again:', orderId);
@@ -293,7 +365,7 @@ export default function OrdersHistory() {
     );
   }
 
-  if (orders.length === 0) {
+  if (orders.length === 0 && !loading) {
     return (
       <div className="orders-history-container">
         <div className="orders-empty">No orders found</div>
@@ -303,8 +375,42 @@ export default function OrdersHistory() {
 
   return (
     <div className="orders-history-container">
-      <div className="orders-list">
-        {orders.map((order) => (
+      {/* Search Box */}
+      <div className="orders-search-container">
+        <div className="search-input-wrapper">
+          <MagnifyingGlass size={20} className="search-icon" />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search orders by ID, date, price, or status..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          {searchTerm && (
+            <button
+              className="search-clear-btn"
+              onClick={handleClearSearch}
+              aria-label="Clear search"
+            >
+              <X size={16} weight="bold" />
+            </button>
+          )}
+        </div>
+        {debouncedSearchTerm && (
+          <div className="search-results-count">
+            Found {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
+          </div>
+        )}
+      </div>
+
+      {/* Orders List */}
+      {filteredOrders.length === 0 && debouncedSearchTerm ? (
+        <div className="orders-empty">
+          No orders found matching "{debouncedSearchTerm}"
+        </div>
+      ) : (
+        <div className="orders-list">
+          {filteredOrders.map((order) => (
           <div key={order.id} className="order-card">
             {/* Order Header */}
             <div className="order-header">
@@ -375,7 +481,8 @@ export default function OrdersHistory() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
