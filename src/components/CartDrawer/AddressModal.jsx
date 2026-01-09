@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AddressModal.css';
 import { BASE_API_URL } from '../../api/apiConfig';
+import Loader from '../Loader/Loader';
 
 export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -405,7 +406,9 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
           
           <div className="address-modal-scrollable">
             {loadingAddresses ? (
-              <div className="address-loading">Loading addresses...</div>
+              <div className="address-loading">
+                <Loader size="medium" />
+              </div>
             ) : savedAddresses.length > 0 ? (
               <>
                 {savedAddresses.map((address) => {
@@ -707,7 +710,16 @@ export default function AddressModal({ isOpen, onClose, onSaveAddress }) {
               !formData.pincode.trim()
             }
           >
-            {loading ? (editingAddressId ? 'Updating...' : 'Saving...') : (editingAddressId ? 'Update Address' : 'Save Address')}
+            {loading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <div className="button-loader">
+                  <Loader size="small" />
+                </div>
+                <span>{editingAddressId ? 'Updating...' : 'Saving...'}</span>
+              </div>
+            ) : (
+              editingAddressId ? 'Update Address' : 'Save Address'
+            )}
           </button>
         </div>
       </div>

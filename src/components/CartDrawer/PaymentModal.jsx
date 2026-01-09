@@ -3,6 +3,7 @@ import './PaymentModal.css';
 import { useCart } from '../../context/CartContext';
 import { BASE_API_URL } from '../../api/apiConfig';
 import OrderSuccessAnimation from './OrderSuccessAnimation';
+import Loader from '../Loader/Loader';
 
 export default function PaymentModal({ isOpen, onClose }) {
   const { cartItems, calculateTotals, fetchCartItems } = useCart();
@@ -252,7 +253,16 @@ export default function PaymentModal({ isOpen, onClose }) {
                   onClick={handleProceedToPay}
                   disabled={isPlacingOrder}
                 >
-                  {isPlacingOrder ? 'Placing Order...' : 'Proceed to Pay'}
+                  {isPlacingOrder ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <div className="button-loader">
+                        <Loader size="small" />
+                      </div>
+                      <span>Placing Order...</span>
+                    </div>
+                  ) : (
+                    'Proceed to Pay'
+                  )}
                 </button>
               </div>
             )}

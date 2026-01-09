@@ -7,6 +7,12 @@
   min-height: 200px;
 }
 
+/* Loader in buttons - no padding */
+.button-loader .loader-container {
+  padding: 0;
+  min-height: auto;
+}
+
 .loader-container.fullscreen {
   position: fixed;
   top: 0;
