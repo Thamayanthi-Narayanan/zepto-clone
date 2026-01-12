@@ -1,0 +1,388 @@
+.location-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.location-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  margin-top: 60px;
+  margin-bottom: 20px;
+}
+
+.location-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+  z-index: 10;
+  border-radius: 50%;
+}
+
+.location-modal-close:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.location-modal-close:focus,
+.location-modal-close:active {
+  outline: none;
+  border: none;
+}
+
+.location-modal-title {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Search Bar */
+.location-search-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.location-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.location-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  background-color: #f8f8f8;
+}
+
+.location-search-input:focus {
+  border-color: #5a1e96;
+  background-color: white;
+}
+
+/* Use Current Location Button */
+.location-current-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.location-current-btn:hover:not(:disabled) {
+  background-color: #f8f8f8;
+  border-color: #5a1e96;
+}
+
+.location-current-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.location-current-btn svg {
+  color: #5a1e96;
+  flex-shrink: 0;
+}
+
+.location-current-btn:focus,
+.location-current-btn:active {
+  outline: none;
+  border-color: #5a1e96;
+}
+
+/* Add New Address Button */
+.location-add-new-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  transition: all 0.2s;
+}
+
+.location-add-new-btn:hover {
+  background-color: #f8f8f8;
+  border-color: #5a1e96;
+}
+
+.location-add-new-btn svg:first-child {
+  color: #5a1e96;
+  flex-shrink: 0;
+}
+
+.location-add-new-btn svg:last-child {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.location-add-new-btn:focus,
+.location-add-new-btn:active {
+  outline: none;
+  border-color: #5a1e96;
+}
+
+/* Add Address Form */
+.location-add-form {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  background-color: white;
+  color: #000;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #5a1e96;
+}
+
+.form-group select {
+  color: #000;
+  cursor: pointer;
+}
+
+.form-group select:hover {
+  border-color: #5a1e96;
+}
+
+.form-group select option {
+  color: #000;
+  background-color: white;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.form-cancel-btn,
+.form-save-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-cancel-btn {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.form-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.form-save-btn {
+  background-color: #5a1e96;
+  color: white;
+}
+
+.form-save-btn:hover {
+  background-color: #4a1a7a;
+}
+
+.form-cancel-btn:focus,
+.form-cancel-btn:active,
+.form-save-btn:focus,
+.form-save-btn:active {
+  outline: none;
+}
+
+/* Saved Addresses Section */
+.location-saved-section {
+  margin-top: 0;
+}
+
+.location-loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.location-saved-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.location-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.location-saved-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.location-saved-item:hover {
+  background-color: #f8f8f8;
+  border-color: #5a1e96;
+}
+
+.saved-item-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.saved-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.saved-item-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.saved-item-address {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.saved-item-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: color 0.2s;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.saved-item-delete:hover {
+  background-color: #f0f0f0;
+  color: #d32f2f;
+}
+
+.saved-item-delete:focus,
+.saved-item-delete:active {
+  outline: none;
+  border: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .location-modal-overlay {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  .location-modal-content {
+    border-radius: 16px 16px 0 0;
+    margin-top: 0;
+    max-width: 100%;
+    min-height: calc(100vh - 40px);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

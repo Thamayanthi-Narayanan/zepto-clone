@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
-import { MagnifyingGlass, X } from "@phosphor-icons/react";
+import { MagnifyingGlass, X, MapPin, CaretDown } from "@phosphor-icons/react";
 import { BASE_API_URL } from "../../api/apiConfig";
 import LoginModal from "../LoginModal/LoginModal";
 import CartDrawer from "../CartDrawer/CartDrawer";
 import AddressModal from "../CartDrawer/AddressModal";
 import PaymentModal from "../CartDrawer/PaymentModal";
 import ProfileModal from "../ProfileModal/ProfileModal";
+import LocationModal from "../LocationModal/LocationModal";
 import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
@@ -18,6 +19,8 @@ export default function Navbar() {
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [scrollYBeforeLock, setScrollYBeforeLock] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,6 +31,40 @@ export default function Navbar() {
 
   // Calculate total cart quantity
   const cartQuantity = cartItems.reduce((total, item) => total + (item.qty || 1), 0);
+
+  // Load saved location from localStorage
+  useEffect(() => {
+    const savedLocation = localStorage.getItem('selectedLocation');
+    if (savedLocation) {
+      try {
+        setSelectedLocation(JSON.parse(savedLocation));
+      } catch (err) {
+        console.error('Error loading saved location:', err);
+      }
+    }
+  }, []);
+
+  // Handle location select
+  const handleLocationSelect = (locationData) => {
+    setSelectedLocation(locationData);
+    localStorage.setItem('selectedLocation', JSON.stringify(locationData));
+  };
+
+  // Handle location click
+  const handleLocationClick = () => {
+    setIsLocationModalOpen(true);
+    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen && !isLoginModalOpen && !isProfileModalOpen) {
+      lockScroll();
+    }
+  };
+
+  // Handle close location modal
+  const handleCloseLocationModal = () => {
+    setIsLocationModalOpen(false);
+    if (!isCartOpen && !isAddressModalOpen && !isPaymentModalOpen && !isLoginModalOpen && !isProfileModalOpen) {
+      unlockScroll();
+    }
+  };
 
   // Fetch products for search
   useEffect(() => {
@@ -355,8 +392,12 @@ export default function Navbar() {
       <div className="nav-left">
         <div className="nav-logo-text" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>Infinite Store</div>
 
-        <div className="nav-location">
-          <span className="location-label">Select Location</span>
+        <div className="nav-location" onClick={handleLocationClick}>
+          <MapPin size={18} weight="fill" className="location-icon" />
+          <span className="location-label">
+            {selectedLocation ? selectedLocation.shortAddress || selectedLocation.address : 'Select Location'}
+          </span>
+          <CaretDown size={16} weight="bold" className="location-dropdown-icon" />
         </div>
       </div>
 
@@ -450,6 +491,11 @@ export default function Navbar() {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={handleCloseProfileModal}
+      />
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={handleCloseLocationModal}
+        onLocationSelect={handleLocationSelect}
       />
     </nav>
   );
