@@ -136,14 +136,16 @@ export const CartProvider = ({ children }) => {
     };
   }, [fetchCartItems]);
 
-  const addToCart = async (product) => {
+  const addToCart = async (product, suppressToast = false) => {
     // Check if user is logged in
     const authToken = localStorage.getItem('authToken');
     
     if (!authToken) {
       // User not logged in - show error or prompt to login
-      setToastMessage('Please login to add items to cart');
-      setShowToast(true);
+      if (!suppressToast) {
+        setToastMessage('Please login to add items to cart');
+        setShowToast(true);
+      }
       return;
     }
 
@@ -174,15 +176,19 @@ export const CartProvider = ({ children }) => {
           console.error("API Error Response:", errorData);
         } catch (jsonError) {
           console.error("Failed to parse error response:", jsonError);
-          setToastMessage(`Failed to add to cart (${response.status}). Please try again.`);
-          setShowToast(true);
+          if (!suppressToast) {
+            setToastMessage(`Failed to add to cart (${response.status}). Please try again.`);
+            setShowToast(true);
+          }
           return;
         }
         
         // Handle specific error cases
         if (response.status === 401) {
-          setToastMessage('Please login to add items to cart');
-          setShowToast(true);
+          if (!suppressToast) {
+            setToastMessage('Please login to add items to cart');
+            setShowToast(true);
+          }
           // Clear invalid token
           localStorage.removeItem('authToken');
           return;
@@ -190,18 +196,24 @@ export const CartProvider = ({ children }) => {
           // 404 could mean endpoint not found or product not found
           const errorMsg = errorData.error || errorData.message || 'Endpoint or product not found';
           console.error("404 Error - Path:", errorData.path, "Error:", errorMsg);
-          setToastMessage(errorData.message || 'Product not found');
-          setShowToast(true);
+          if (!suppressToast) {
+            setToastMessage(errorData.message || 'Product not found');
+            setShowToast(true);
+          }
           return;
         } else if (response.status === 500) {
           // 500 Internal Server Error
           console.error("500 Error - Full error data:", errorData);
-          setToastMessage(errorData.message || "Internal server error. Please try again later.");
-          setShowToast(true);
+          if (!suppressToast) {
+            setToastMessage(errorData.message || "Internal server error. Please try again later.");
+            setShowToast(true);
+          }
           return;
         } else {
-          setToastMessage(errorData.message || errorData.error || "Failed to add to cart. Please try again.");
-          setShowToast(true);
+          if (!suppressToast) {
+            setToastMessage(errorData.message || errorData.error || "Failed to add to cart. Please try again.");
+            setShowToast(true);
+          }
           return;
         }
       }
@@ -212,17 +224,23 @@ export const CartProvider = ({ children }) => {
         // API call successful - refresh cart from server to get latest state
         // This ensures cart is in sync with backend
         await fetchCartItems();
-        // Show success toast notification
-        setToastMessage('Added to cart!');
-        setShowToast(true);
+        // Show success toast notification only if not suppressed
+        if (!suppressToast) {
+          setToastMessage('Added to cart!');
+          setShowToast(true);
+        }
       } else {
-        setToastMessage(result.message || "Failed to add to cart. Please try again.");
-        setShowToast(true);
+        if (!suppressToast) {
+          setToastMessage(result.message || "Failed to add to cart. Please try again.");
+          setShowToast(true);
+        }
       }
     } catch (err) {
       console.error("Error adding product to cart:", err);
-      setToastMessage("Network error. Please try again.");
-      setShowToast(true);
+      if (!suppressToast) {
+        setToastMessage("Network error. Please try again.");
+        setShowToast(true);
+      }
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './OrdersHistory.css';
 import { X, CheckCircle, DotsThreeVertical, MagnifyingGlass } from '@phosphor-icons/react';
 import { BASE_API_URL } from '../../api/apiConfig';
+import { useCart } from '../../context/CartContext';
 import Loader from '../Loader/Loader';
 import product1 from '../../assets/product1.png';
 import product2 from '../../assets/product2.png';
@@ -25,11 +26,13 @@ import product19 from '../../assets/product19.png.png';
 import product20 from '../../assets/product20.png.png';
 
 export default function OrdersHistory() {
+  const { addToCart, setToastMessage, setShowToast, fetchCartItems } = useCart();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [reorderingOrderId, setReorderingOrderId] = useState(null);
 
   // Product images array for mapping (product1 to product20)
   const productImages = [
@@ -335,9 +338,133 @@ export default function OrdersHistory() {
     setDebouncedSearchTerm('');
   };
 
-  const handleOrderAgain = (orderId) => {
-    console.log('Order again:', orderId);
-    // TODO: Implement order again functionality
+  const handleOrderAgain = async (orderId) => {
+    const authToken = localStorage.getItem('authToken');
+    
+    if (!authToken) {
+      setToastMessage('Please login to reorder');
+      setShowToast(true);
+      return;
+    }
+
+    setReorderingOrderId(orderId);
+
+    try {
+      // Fetch order details by Order ID
+      const GET_ORDER_URL = BASE_API_URL + `/api/orders/${orderId}`;
+      console.log("Fetching order details - URL:", GET_ORDER_URL);
+
+      const response = await fetch(GET_ORDER_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          console.error("Failed to parse error response:", jsonError);
+        }
+
+        if (response.status === 401) {
+          setToastMessage('Please login to reorder');
+          setShowToast(true);
+          localStorage.removeItem('authToken');
+        } else if (response.status === 404) {
+          setToastMessage('Order not found');
+          setShowToast(true);
+        } else if (response.status === 500) {
+          setToastMessage(errorData.message || "Internal server error. Please try again later.");
+          setShowToast(true);
+        } else {
+          setToastMessage(errorData.message || "Failed to fetch order details. Please try again.");
+          setShowToast(true);
+        }
+        setReorderingOrderId(null);
+        return;
+      }
+
+      const result = await response.json();
+      console.log("Order details fetched:", result);
+
+      // Check if order has products
+      if (!result.products || result.products.length === 0) {
+        setToastMessage('No products found in this order');
+        setShowToast(true);
+        setReorderingOrderId(null);
+        return;
+      }
+
+      // Add each product to cart with correct quantity
+      let addedCount = 0;
+      let failedProducts = [];
+
+      // Add all products to cart
+      for (const product of result.products) {
+        try {
+          // Create product object matching cart format
+          const productToAdd = {
+            id: product.productId,
+            productId: product.productId,
+            productName: product.productName,
+            price: product.price,
+            qty: 1, // addToCart adds one at a time
+          };
+
+          // Add product to cart (quantity) times
+          // Note: addToCart adds one item at a time, so we call it multiple times for quantity
+          for (let i = 0; i < product.quantity; i++) {
+            try {
+              await addToCart(productToAdd, true); // suppressToast = true
+              addedCount++;
+            } catch (err) {
+              console.error(`Error adding product ${product.productId} to cart:`, err);
+              failedProducts.push(product.productName);
+            }
+          }
+        } catch (err) {
+          console.error(`Error adding product ${product.productId} to cart:`, err);
+          failedProducts.push(product.productName);
+        }
+      }
+
+      // Refresh cart items to show newly added products
+      await fetchCartItems();
+
+      // Show final success message and open cart drawer
+      if (addedCount > 0 && failedProducts.length === 0) {
+        // Wait a bit to let individual toasts finish, then show final message
+        setTimeout(() => {
+          setToastMessage(`Added ${addedCount} item${addedCount > 1 ? 's' : ''} to cart!`);
+          setShowToast(true);
+          
+          // Dispatch event to open cart drawer
+          window.dispatchEvent(new CustomEvent('openCartDrawer'));
+        }, 500);
+      } else if (addedCount > 0 && failedProducts.length > 0) {
+        setTimeout(() => {
+          setToastMessage(`Added ${addedCount} items, but some failed. Please try again.`);
+          setShowToast(true);
+        }, 500);
+      } else if (failedProducts.length > 0) {
+        setTimeout(() => {
+          setToastMessage('Failed to add items to cart. Please try again.');
+          setShowToast(true);
+        }, 500);
+      }
+
+    } catch (err) {
+      console.error("Error reordering:", err);
+      setToastMessage("Network error. Please try again.");
+      setShowToast(true);
+    } finally {
+      setReorderingOrderId(null);
+    }
   };
 
   const handleRateOrder = (orderId) => {
@@ -459,23 +586,25 @@ export default function OrdersHistory() {
               {order.status === 'cancelled' ? (
                 <button 
                   className="order-again-btn"
-                  onClick={() => handleOrderAgain(order.id)}
+                  onClick={() => handleOrderAgain(order.orderId || order.id)}
+                  disabled={reorderingOrderId === (order.orderId || order.id)}
                 >
-                  Order Again
+                  {reorderingOrderId === (order.orderId || order.id) ? 'Adding to Cart...' : 'Order Again'}
                 </button>
               ) : (
                 <>
                   <button 
                     className="rate-order-btn"
-                    onClick={() => handleRateOrder(order.id)}
+                    onClick={() => handleRateOrder(order.orderId || order.id)}
                   >
                     Rate Order
                   </button>
                   <button 
                     className="order-again-btn"
-                    onClick={() => handleOrderAgain(order.id)}
+                    onClick={() => handleOrderAgain(order.orderId || order.id)}
+                    disabled={reorderingOrderId === (order.orderId || order.id)}
                   >
-                    Order Again
+                    {reorderingOrderId === (order.orderId || order.id) ? 'Adding to Cart...' : 'Order Again'}
                   </button>
                 </>
               )}

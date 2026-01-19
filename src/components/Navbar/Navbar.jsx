@@ -271,10 +271,33 @@ export default function Navbar() {
 
   const handleCartClick = () => {
     setIsCartOpen(true);
+    // Close profile modal if open
+    if (isProfileModalOpen) {
+      setIsProfileModalOpen(false);
+    }
     if (!isLoginModalOpen && !isAddressModalOpen && !isPaymentModalOpen) {
       lockScroll();
     }
   };
+
+  // Listen for open cart drawer event
+  useEffect(() => {
+    const handleOpenCartDrawer = () => {
+      setIsCartOpen(true);
+      // Close profile modal if open
+      if (isProfileModalOpen) {
+        setIsProfileModalOpen(false);
+      }
+      if (!isLoginModalOpen && !isAddressModalOpen && !isPaymentModalOpen) {
+        lockScroll();
+      }
+    };
+
+    window.addEventListener('openCartDrawer', handleOpenCartDrawer);
+    return () => {
+      window.removeEventListener('openCartDrawer', handleOpenCartDrawer);
+    };
+  }, [isLoginModalOpen, isAddressModalOpen, isPaymentModalOpen, isProfileModalOpen]);
 
   const handleCloseCart = () => {
     setIsCartOpen(false);
