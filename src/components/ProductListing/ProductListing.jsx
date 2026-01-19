@@ -25,19 +25,32 @@ import product18 from '../../assets/product18.png.png';
 import product19 from '../../assets/product19.png.png';
 import product20 from '../../assets/product20.png.png';
 
-export default function ProductListing() {
+export default function ProductListing({ category = 'All' }) {
   const { addToCart, cartItems, updateQuantity } = useCart();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_ENDPOINT = "/api/products/all";
-  const FULL_API_URL = BASE_API_URL + API_ENDPOINT;
-
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      
       try {
+        // Build API endpoint based on category
+        let API_ENDPOINT;
+        if (category === 'All' || !category) {
+          API_ENDPOINT = "/api/products/all";
+        } else {
+          // Convert category name to lowercase for API endpoint
+          const categoryName = category.toLowerCase();
+          API_ENDPOINT = `/api/products/category/${categoryName}`;
+        }
+        
+        const FULL_API_URL = BASE_API_URL + API_ENDPOINT;
+        console.log("Fetching products from:", FULL_API_URL);
+
         const response = await fetch(FULL_API_URL, {
           method: "GET",
           headers: {
@@ -53,6 +66,7 @@ export default function ProductListing() {
         const result = await response.json();
         if (result.success && result.data) {
           setProducts(result.data);
+          console.log(`Products fetched for category "${category}":`, result.data.length);
         } else {
           console.error("API call successful but data not as expected:", result);
           setError("Failed to fetch products: Data format incorrect.");
@@ -66,7 +80,7 @@ export default function ProductListing() {
     };
 
     fetchProducts();
-  }, []);
+  }, [category]);
 
   if (loading) {
     return (

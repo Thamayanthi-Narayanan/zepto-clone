@@ -349,15 +349,17 @@ export const CartProvider = ({ children }) => {
       totalSavings += itemMRP - itemPrice;
     });
 
-    // Handling fee and delivery fee (both FREE in this case)
+    // Handling fee (always FREE)
     const handlingFee = 0;
-    const deliveryFee = 0;
     const handlingFeeMRP = 10;
+    
+    // Delivery fee: ₹30 if total < 200, FREE if total >= 200
     const deliveryFeeMRP = 30;
+    const deliveryFee = itemTotal < 200 ? 30 : 0;
 
     const totalMRP = itemTotalMRP + handlingFeeMRP + deliveryFeeMRP;
     const totalToPay = itemTotal + handlingFee + deliveryFee;
-    const totalSavingsOnOrder = totalSavings + handlingFeeMRP + deliveryFeeMRP;
+    const totalSavingsOnOrder = totalSavings + handlingFeeMRP + (deliveryFeeMRP - deliveryFee);
 
     return {
       itemTotal,
@@ -370,7 +372,7 @@ export const CartProvider = ({ children }) => {
       totalMRP,
       totalSavingsOnOrder,
       discountOnMRP: totalSavings,
-      freeDeliverySavings: deliveryFeeMRP,
+      freeDeliverySavings: deliveryFee === 0 ? deliveryFeeMRP : 0,
       savingsOnHandlingFee: handlingFeeMRP,
     };
   };

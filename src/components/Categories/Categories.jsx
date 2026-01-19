@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Categories.css";
 import { BASE_API_URL } from "../../api/apiConfig";
 
-export default function Categories() {
+export default function Categories({ selectedCategory, onCategorySelect }) {
   const [categories, setCategories] = useState([]);
   const API_ENDPOINT = "/api/metadata"; 
   const FULL_API_URL = BASE_API_URL + API_ENDPOINT;
@@ -37,11 +37,21 @@ export default function Categories() {
     fetchCategories();
   }, []); 
 
+  const handleCategoryClick = (catName) => {
+    if (onCategorySelect) {
+      onCategorySelect(catName);
+    }
+  };
+
   return (
     <div className="categories">
       <div className="categories-container">
         {categories.map((catName, index) => (
-          <div className={`category-item ${catName === "All" ? "active" : ""}`} key={index}>
+          <div 
+            className={`category-item ${selectedCategory === catName ? "active" : ""}`} 
+            key={index}
+            onClick={() => handleCategoryClick(catName)}
+          >
             <span>{catName}</span>
           </div>
         ))}

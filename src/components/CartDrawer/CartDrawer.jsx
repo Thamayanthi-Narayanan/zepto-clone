@@ -79,18 +79,20 @@ export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
           </span>
         </div>
 
-        {/* NO FEES card */}
-        <div className="cart-fees-card">
-          <div className="cart-fees-left">
-            <div className="cart-fees-icon">₹0</div>
-            <div className="cart-fees-text">
-              <div className="cart-fees-title">NO FEES</div>
-              <div className="cart-fees-sub">
-                ₹0 Handling Fee · ₹0 Rain &amp; Surge Fee · ₹0 Delivery Fee above ₹99
+        {/* NO FEES card - only show when delivery fee is FREE */}
+        {totals.deliveryFee === 0 && (
+          <div className="cart-fees-card">
+            <div className="cart-fees-left">
+              <div className="cart-fees-icon">₹0</div>
+              <div className="cart-fees-text">
+                <div className="cart-fees-title">NO FEES</div>
+                <div className="cart-fees-sub">
+                  ₹0 Handling Fee · ₹0 Rain &amp; Surge Fee · ₹0 Delivery Fee above ₹200
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Delivery row */}
         <div className="cart-delivery-row">
@@ -187,8 +189,14 @@ export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
           <div className="cart-bill-row">
             <span className="cart-bill-label">Delivery Fee</span>
             <span className="cart-bill-value">
-              <span className="cart-bill-strike">₹{totals.deliveryFeeMRP}</span>
-              <span className="cart-bill-free">FREE</span>
+              {totals.deliveryFee === 0 ? (
+                <>
+                  <span className="cart-bill-strike">₹{totals.deliveryFeeMRP}</span>
+                  <span className="cart-bill-free">FREE</span>
+                </>
+              ) : (
+                <span className="cart-bill-main">₹{totals.deliveryFee}</span>
+              )}
             </span>
           </div>
           <div className="cart-bill-total-row">
