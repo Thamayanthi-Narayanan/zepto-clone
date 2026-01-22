@@ -5,6 +5,7 @@ import { ShoppingBag, ChatCircle, Heart, MapPin, User, SignOut, Trash } from '@p
 import { BASE_API_URL } from '../../api/apiConfig';
 import { useCart } from '../../context/CartContext';
 import OrdersHistory from './OrdersHistory';
+import CustomerSupport from './CustomerSupport';
 
 export default function ProfileModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -425,7 +426,8 @@ export default function ProfileModal({ isOpen, onClose }) {
           {/* Right Content Area */}
           <div className="profile-content-area">
             {activeTab === 'Orders' && <OrdersHistory />}
-            {activeTab !== 'Orders' && (
+            {activeTab === 'Customer Support' && <CustomerSupport />}
+            {activeTab !== 'Orders' && activeTab !== 'Customer Support' && (
               <div className="profile-empty-content">
                 <p>{activeTab} content coming soon...</p>
               </div>
