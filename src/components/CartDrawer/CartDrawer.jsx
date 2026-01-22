@@ -2,38 +2,72 @@ import React from "react";
 import "./CartDrawer.css";
 import { useCart } from '../../context/CartContext';
 import { Trash } from '@phosphor-icons/react';
-import product1 from '../../assets/product1.png';
-import product2 from '../../assets/product2.png';
-import product3 from '../../assets/product3.png';
-import product4 from '../../assets/product4.png';
-import product5 from '../../assets/product5.png';
-import product6 from '../../assets/product6.png.png';
-import product7 from '../../assets/product7.png.png';
-import product8 from '../../assets/product8.png.png';
-import product9 from '../../assets/product9.png.png';
-import product10 from '../../assets/product10.png.png';
-import product11 from '../../assets/product11.png.png';
-import product12 from '../../assets/product12.png.png';
-import product13 from '../../assets/product13.png.png';
-import product14 from '../../assets/product14.png.png';
-import product15 from '../../assets/product15.png.png';
-import product16 from '../../assets/product16.png.png';
-import product17 from '../../assets/product17.png.png';
-import product18 from '../../assets/product18.png.png';
-import product19 from '../../assets/product19.png.png';
-import product20 from '../../assets/product20.png.png';
+
+// Image utility - beauty, home, and fresh products use .webp, others use .png
+const getProductImage = (productCategory, productId) => {
+  // Normalize category to lowercase
+  const normalizedCategory = String(productCategory || '').toLowerCase().trim();
+  
+  // If beauty category, map product IDs to available images (1-20)
+  // Product ID 121 → image 1, ID 122 → image 2, ..., ID 140 → image 20, then cycle
+  // All beauty products start from ID 121
+  if (normalizedCategory === 'beauty') {
+    // Map product ID to image number (1-20)
+    // For ID 121 → 1, ID 122 → 2, ..., ID 140 → 20, ID 141 → 1, etc.
+    const imageNumber = ((productId - 121) % 20) + 1;
+    return `/product/beauty-product${imageNumber}.webp`;
+  }
+  
+  // If home category, map product IDs to available images (1-20)
+  // Product ID 21 → image 1, ID 22 → image 2, ..., ID 40 → image 20, then cycle
+  if (normalizedCategory === 'home') {
+    const imageNumber = ((productId - 21) % 20) + 1;
+    return `/product/home-product${imageNumber}.webp`;
+  }
+  
+  // If fresh category, map product IDs to available images (1-20)
+  // Product ID 61 → image 1, ID 62 → image 2, ..., ID 80 → image 20, then cycle
+  if (normalizedCategory === 'fresh') {
+    const imageNumber = ((productId - 61) % 20) + 1;
+    return `/product/fresh-product${imageNumber}.webp`;
+  }
+  
+  // If toys category, map product IDs to available images (1-20)
+  // Product ID 41 → image 1, ID 42 → image 2, ..., ID 60 → image 20, then cycle
+  if (normalizedCategory === 'toys') {
+    const imageNumber = ((productId - 41) % 20) + 1;
+    return `/product/toys-product${imageNumber}.webp`;
+  }
+  
+  // If electronics category, map product IDs to available images (1-20)
+  // Product ID 81 → image 1, ID 82 → image 2, ..., ID 100 → image 20, then cycle
+  if (normalizedCategory === 'electronics') {
+    const imageNumber = ((productId - 81) % 20) + 1;
+    return `/product/electronics-product${imageNumber}.webp`;
+  }
+  
+  // If mobile category, map product IDs to available images (1-20)
+  // Product ID 101 → image 1, ID 102 → image 2, ..., ID 120 → image 20, then cycle
+  if (normalizedCategory === 'mobile') {
+    const imageNumber = ((productId - 101) % 20) + 1;
+    return `/product/mobile-product${imageNumber}.webp`;
+  }
+  
+  // If fashion category, map product IDs to available images (1-20)
+  // Product ID 141 → image 1, ID 142 → image 2, ..., ID 160 → image 20, then cycle
+  if (normalizedCategory === 'fashion') {
+    const imageNumber = ((productId - 141) % 20) + 1;
+    return `/product/fashion-product${imageNumber}.webp`;
+  }
+  
+  // For all other products, use product{id}.png
+  return `/product/product${productId}.png`;
+};
 
 export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
   const { cartItems, updateQuantity, calculateTotals, removeFromCart } = useCart();
   const totals = calculateTotals();
   
-  // Local product images (product1 to product20)
-  const localProductImages = [
-    product1, product2, product3, product4, product5,
-    product6, product7, product8, product9, product10,
-    product11, product12, product13, product14, product15,
-    product16, product17, product18, product19, product20
-  ];
 
   if (!isOpen) return null;
 
@@ -107,10 +141,63 @@ export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
           {cartItems.map((item) => {
             const itemTotalPrice = item.price * item.qty;
             const itemTotalMRP = item.mrp * item.qty;
-            // Get product image based on productId
+            // Get product image based on category and productId
             const productId = item.productId || item.id;
-            const imageIndex = (parseInt(productId) - 1) % localProductImages.length;
-            const productImage = localProductImages[imageIndex];
+            // Get category from product data (same logic as ProductListing)
+            let productCategory = item.category || item.categoryName || item.productCategory || item.subcategoryName || 'all';
+            // Normalize to lowercase
+            productCategory = String(productCategory).toLowerCase().trim();
+            
+            // Special handling: If product ID is 21-40, it's definitely a home product
+            if (productId >= 21 && productId <= 40) {
+              productCategory = 'home';
+            }
+            // Special handling: If product ID is 41-60, it's definitely a toys product
+            else if (productId >= 41 && productId <= 60) {
+              productCategory = 'toys';
+            }
+            // Special handling: If product ID is 61-80, it's definitely a fresh product
+            else if (productId >= 61 && productId <= 80) {
+              productCategory = 'fresh';
+            }
+            // Special handling: If product ID is 81-100, it's definitely an electronics product
+            else if (productId >= 81 && productId <= 100) {
+              productCategory = 'electronics';
+            }
+            // Special handling: If product ID is 101-120, it's definitely a mobile product
+            else if (productId >= 101 && productId <= 120) {
+              productCategory = 'mobile';
+            }
+            // Special handling: If product ID is 121-140, it's definitely a beauty product
+            // Beauty products: 121-140 (20 products, cycles through 20 images)
+            else if (productId >= 121 && productId < 141) {
+              productCategory = 'beauty';
+            }
+            // Special handling: If product ID is 141 or above, it's definitely a fashion product
+            else if (productId >= 141) {
+              productCategory = 'fashion';
+            }
+            // If category is still 'all' but product name suggests category, set it
+            else if (productCategory === 'all' && item.productName) {
+              const productNameLower = String(item.productName).toLowerCase();
+              if (productNameLower.includes('beauty') || productNameLower.includes('cosmetic') || productNameLower.includes('makeup') || productNameLower.includes('lipstick') || productNameLower.includes('maybelline')) {
+                productCategory = 'beauty';
+              } else if (productNameLower.includes('home') || productNameLower.includes('furniture') || productNameLower.includes('decor')) {
+                productCategory = 'home';
+              } else if (productNameLower.includes('fresh') || productNameLower.includes('vegetable') || productNameLower.includes('fruit') || productNameLower.includes('grocery')) {
+                productCategory = 'fresh';
+              } else if (productNameLower.includes('toy') || productNameLower.includes('toy') || productNameLower.includes('game') || productNameLower.includes('play')) {
+                productCategory = 'toys';
+              } else if (productNameLower.includes('electronic') || productNameLower.includes('laptop') || productNameLower.includes('tablet') || productNameLower.includes('device')) {
+                productCategory = 'electronics';
+              } else if (productNameLower.includes('mobile') || productNameLower.includes('phone') || productNameLower.includes('smartphone')) {
+                productCategory = 'mobile';
+              } else if (productNameLower.includes('fashion') || productNameLower.includes('clothing') || productNameLower.includes('apparel') || productNameLower.includes('wear') || productNameLower.includes('dress') || productNameLower.includes('shirt') || productNameLower.includes('pant')) {
+                productCategory = 'fashion';
+              }
+            }
+            
+            const productImage = getProductImage(productCategory, productId);
             
             return (
               <div className="cart-item" key={item.id}>
@@ -119,6 +206,44 @@ export default function CartDrawer({ isOpen, onClose, onOpenAddressModal }) {
                     src={productImage}
                     alt={item.productName}
                     className="cart-item-image"
+                    onError={(e) => {
+                      const currentSrc = e.target.src;
+                      // If beauty .webp.webp fails, try .webp, then .png
+                      if (currentSrc.includes('beauty-product') && currentSrc.includes('.webp')) {
+                        // If beauty .webp fails, try .png
+                        const imageNumber = ((productId - 121) % 20) + 1;
+                        e.target.src = `/product/beauty-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('home-product') && currentSrc.includes('.webp')) {
+                        // If home .webp fails, try .png
+                        const imageNumber = ((productId - 21) % 20) + 1;
+                        e.target.src = `/product/home-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('fresh-product') && currentSrc.includes('.webp')) {
+                        // If fresh .webp fails, try .png
+                        const imageNumber = ((productId - 61) % 20) + 1;
+                        e.target.src = `/product/fresh-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('toys-product') && currentSrc.includes('.webp')) {
+                        // If toys .webp fails, try .png
+                        const imageNumber = ((productId - 41) % 20) + 1;
+                        e.target.src = `/product/toys-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('electronics-product') && currentSrc.includes('.webp')) {
+                        // If electronics .webp fails, try .png
+                        const imageNumber = ((productId - 81) % 20) + 1;
+                        e.target.src = `/product/electronics-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('mobile-product') && currentSrc.includes('.webp')) {
+                        // If mobile .webp fails, try .png
+                        const imageNumber = ((productId - 101) % 20) + 1;
+                        e.target.src = `/product/mobile-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('fashion-product') && currentSrc.includes('.webp')) {
+                        // If fashion .webp fails, try .png
+                        const imageNumber = ((productId - 141) % 20) + 1;
+                        e.target.src = `/product/fashion-product${imageNumber}.png`;
+                      } else if (currentSrc.includes('.png') && !currentSrc.includes('.png.png')) {
+                        // For non-category products, try .png.png
+                        e.target.src = `/product/product${productId}.png.png`;
+                      } else {
+                        e.target.style.display = 'none';
+                      }
+                    }}
                   />
                 </div>
                 <div className="cart-item-middle">
