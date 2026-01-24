@@ -69,7 +69,7 @@ export default function CustomerSupport() {
           </div>
           <div className="customer-support-btn-content">
             <div className="customer-support-btn-title">Chat with Us</div>
-            <div className="customer-support-btn-subtitle">Start a live chat conversation</div>
+            <div className="customer-support-btn-subtitle">Start a chat conversation</div>
           </div>
         </button>
 
