@@ -1,0 +1,42 @@
+URGENT: CORS Configuration Required for Frontend Integration
+
+Hi Backend Team,
+
+The frontend React application running on http://localhost:5173 cannot connect to the backend API and WebSocket endpoints due to CORS (Cross-Origin Resource Sharing) restrictions.
+
+REQUIRED ACTION:
+Please enable CORS for http://localhost:5173 for the following endpoints:
+
+1. All REST API endpoints: /api/**
+2. WebSocket endpoint: /ws-chat/**
+
+QUICK FIX FOR SPRING BOOT:
+
+Option 1 - Add to WebSocketConfig.java:
+In the registerStompEndpoints method, change:
+    .setAllowedOrigins("*")
+to:
+    .setAllowedOrigins("http://localhost:5173")
+
+Option 2 - Create CorsConfig.java:
+See BACKEND_CORS_SETUP.md file for complete code
+
+WHAT'S NOT WORKING:
+- API calls to /api/admin/chat-list return CORS error
+- WebSocket connection to /ws-chat fails with CORS error
+- All API endpoints are blocked from localhost:5173
+
+WHAT'S NEEDED:
+- Allow origin: http://localhost:5173
+- Allow methods: GET, POST, PUT, DELETE, OPTIONS
+- Allow credentials: true (for auth tokens)
+- Allow headers: Content-Type, Authorization, ngrok-skip-browser-warning
+
+After making changes:
+1. Restart backend server
+2. Frontend will automatically work
+
+See BACKEND_CORS_SETUP.md for detailed implementation guide.
+
+Thank you!
+

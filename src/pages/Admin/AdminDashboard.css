@@ -549,6 +549,18 @@
   padding: 40px;
 }
 
+.admin-error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px 20px;
+  margin: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #fecaca;
+  text-align: center;
+}
+
 .admin-no-chat-icon {
   width: 80px;
   height: 80px;

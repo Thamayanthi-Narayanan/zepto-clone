@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaperPlaneTilt, Smiley, MagnifyingGlass, Phone, VideoCamera, DotsThreeVertical } from '@phosphor-icons/react';
+import { getApiUrl } from '../../api/apiConfig';
+import websocketService from '../../services/websocketService';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
@@ -9,19 +11,195 @@ export default function AdminDashboard() {
   const [selectedChat, setSelectedChat] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [inputMessage, setInputMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    // TODO: Replace with actual API call later
-    loadMockChats();
+    // Initialize WebSocket connection
+    websocketService.connect(
+      () => {
+        console.log('WebSocket connected successfully');
+      },
+      (error) => {
+        console.error('WebSocket connection error:', error);
+        setError('Failed to connect to chat service');
+      }
+    );
+
+    // Load chats from API
+    loadChats();
+
+    // Cleanup on unmount
+    return () => {
+      if (selectedChat) {
+        websocketService.unsubscribe(selectedChat.sessionId || selectedChat.id);
+      }
+      websocketService.disconnect();
+    };
   }, []);
 
   useEffect(() => {
     scrollToBottom();
   }, [selectedChat?.messages]);
 
+  // Subscribe to WebSocket when a chat is selected
+  useEffect(() => {
+    if (selectedChat && websocketService.isConnected()) {
+      const sessionId = selectedChat.sessionId || selectedChat.id;
+      
+      // Unsubscribe from previous chat if any
+      websocketService.subscriptions.forEach((sub, id) => {
+        if (id !== sessionId) {
+          websocketService.unsubscribe(id);
+        }
+      });
+
+      // Subscribe to new chat
+      websocketService.subscribe(sessionId, (message) => {
+        console.log('Received WebSocket message:', message);
+        handleIncomingMessage(message);
+      });
+    }
+  }, [selectedChat]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const loadChats = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found');
+      }
+
+      const apiUrl = getApiUrl('/api/admin/chat-list');
+      console.log('Loading chats from:', apiUrl);
+      console.log('Admin token:', adminToken ? 'Present' : 'Missing');
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      
+      console.log('Chat list response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.error('Error response body:', errorText);
+        let errorData = {};
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error('Failed to parse error response');
+        }
+        
+        // If 404, the endpoint might not exist - show helpful message
+        if (response.status === 404) {
+          throw new Error(`Endpoint not found: /api/admin/chat-list. Please verify the endpoint exists on the backend.`);
+        }
+        
+        throw new Error(errorData.message || `Failed to load chats: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.data && Array.isArray(result.data)) {
+        // Transform API data to match component structure
+        const transformedChats = result.data.map((chat, index) => ({
+          id: chat.sessionId || index + 1,
+          sessionId: chat.sessionId,
+          customerId: chat.userId,
+          customerName: `User ${chat.userId}`, // You might want to fetch user names separately
+          lastMessage: chat.lastMessage || 'No messages',
+          lastMessageTime: formatTime(chat.lastMessageTime),
+          unreadCount: 0, // API doesn't provide this, might need separate endpoint
+          status: chat.status === 'OPEN' ? 'Online' : 'Offline',
+          lastSeen: formatTime(chat.lastMessageTime),
+          messages: [], // Messages will be loaded when chat is selected
+        }));
+        setChats(transformedChats);
+      } else {
+        // If no chats, use empty array or mock data for testing
+        console.log('No chats found or invalid response format');
+        setChats([]);
+      }
+    } catch (err) {
+      console.error('Error loading chats:', err);
+      setError(err.message || 'Failed to load chats');
+      // Fallback to mock data for development
+      loadMockChats();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleIncomingMessage = (message) => {
+    if (!selectedChat) return;
+
+    const sessionId = selectedChat.sessionId || selectedChat.id;
+    if (message.sessionId !== sessionId) return;
+
+    // Add new message to selected chat
+    const newMessage = {
+      id: Date.now(),
+      sender: message.sender === 'ADMIN' ? 'admin' : 'customer',
+      text: message.message,
+      timestamp: formatTimestamp(message.timestamp),
+    };
+
+    const updatedChat = {
+      ...selectedChat,
+      messages: [...selectedChat.messages, newMessage],
+      lastMessage: message.message,
+      lastMessageTime: formatTime(message.timestamp),
+    };
+
+    setSelectedChat(updatedChat);
+
+    // Update in chats list
+    const updatedChats = chats.map(c =>
+      (c.sessionId || c.id) === sessionId ? updatedChat : c
+    );
+    setChats(updatedChats);
+  };
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return new Date().toLocaleString();
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }).replace(',', '');
+    } catch (error) {
+      return new Date().toLocaleString();
+    }
+  };
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return new Date().toLocaleTimeString();
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      return new Date().toLocaleTimeString();
+    }
   };
 
   const loadMockChats = () => {
@@ -29,6 +207,7 @@ export default function AdminDashboard() {
     const mockChats = [
       {
         id: 1,
+        sessionId: 101, // Use sessionId for WebSocket
         customerId: 101,
         customerName: 'John Doe',
         lastMessage: 'Hello, I need help with my order',
@@ -65,6 +244,7 @@ export default function AdminDashboard() {
       },
       {
         id: 2,
+        sessionId: 102, // Use sessionId for WebSocket
         customerId: 102,
         customerName: 'Jane Smith',
         lastMessage: 'When will my order be delivered?',
@@ -95,6 +275,7 @@ export default function AdminDashboard() {
       },
       {
         id: 3,
+        sessionId: 103, // Use sessionId for WebSocket
         customerId: 103,
         customerName: 'Mike Johnson',
         lastMessage: 'Thank you for your help!',
@@ -125,6 +306,7 @@ export default function AdminDashboard() {
       },
       {
         id: 4,
+        sessionId: 104, // Use sessionId for WebSocket
         customerId: 104,
         customerName: 'Sarah Williams',
         lastMessage: 'I want to return a product',
@@ -158,52 +340,141 @@ export default function AdminDashboard() {
     setChats(mockChats);
   };
 
-  const handleChatClick = (chat) => {
+  const handleChatClick = async (chat) => {
+    // Unsubscribe from previous chat
+    if (selectedChat) {
+      const prevSessionId = selectedChat.sessionId || selectedChat.id;
+      websocketService.unsubscribe(prevSessionId);
+    }
+
+    // If chat has no messages, we might need to load them
+    // For now, WebSocket will handle real-time messages
+    // If you have an API to fetch chat history, call it here
+    
     setSelectedChat(chat);
+    
+    // Subscribe to new chat's WebSocket
+    const sessionId = chat.sessionId || chat.id;
+    if (websocketService.isConnected()) {
+      websocketService.subscribe(sessionId, (message) => {
+        handleIncomingMessage(message);
+      });
+    }
+    
     // Mark as read when opened
     const updatedChats = chats.map(c => 
-      c.id === chat.id ? { ...c, unreadCount: 0 } : c
+      (c.sessionId || c.id) === (chat.sessionId || chat.id) ? { ...c, unreadCount: 0 } : c
     );
     setChats(updatedChats);
   };
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim() || !selectedChat) return;
 
-    const newMessage = {
-      id: selectedChat.messages.length + 1,
+    const messageText = inputMessage.trim();
+    const sessionId = selectedChat.sessionId || selectedChat.id;
+    
+    // Optimistically add message to UI
+    const tempMessage = {
+      id: Date.now(),
       sender: 'admin',
-      text: inputMessage.trim(),
-      timestamp: new Date().toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }).replace(',', '')
+      text: messageText,
+      timestamp: formatTimestamp(new Date()),
+      sending: true, // Mark as sending
     };
 
-    const updatedChat = {
+    const tempUpdatedChat = {
       ...selectedChat,
-      messages: [...selectedChat.messages, newMessage],
-      lastMessage: inputMessage.trim(),
-      lastMessageTime: new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      })
+      messages: [...selectedChat.messages, tempMessage],
+      lastMessage: messageText,
+      lastMessageTime: formatTime(new Date()),
     };
 
-    setSelectedChat(updatedChat);
+    setSelectedChat(tempUpdatedChat);
     
     // Update in chats list
-    const updatedChats = chats.map(c => 
-      c.id === selectedChat.id ? updatedChat : c
+    const tempUpdatedChats = chats.map(c =>
+      (c.sessionId || c.id) === sessionId ? tempUpdatedChat : c
     );
-    setChats(updatedChats);
+    setChats(tempUpdatedChats);
     
     setInputMessage('');
+
+    // Send message via API
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found');
+      }
+
+      const response = await fetch(getApiUrl('/api/admin/chat/reply'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify({
+          sessionId: parseInt(sessionId),
+          message: messageText,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to send message');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        // Remove temporary message and add confirmed message
+        const confirmedMessage = {
+          id: Date.now() + 1,
+          sender: 'admin',
+          text: result.data.message,
+          timestamp: formatTimestamp(result.data.timestamp),
+        };
+
+        const confirmedChat = {
+          ...selectedChat,
+          messages: [
+            ...selectedChat.messages.filter(m => m.id !== tempMessage.id),
+            confirmedMessage
+          ],
+          lastMessage: result.data.message,
+          lastMessageTime: formatTime(result.data.timestamp),
+        };
+
+        setSelectedChat(confirmedChat);
+        
+        // Update in chats list
+        const confirmedChats = chats.map(c =>
+          (c.sessionId || c.id) === sessionId ? confirmedChat : c
+        );
+        setChats(confirmedChats);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError(error.message || 'Failed to send message');
+      
+      // Remove failed message from UI
+      const failedChat = {
+        ...selectedChat,
+        messages: selectedChat.messages.filter(m => m.id !== tempMessage.id),
+      };
+      setSelectedChat(failedChat);
+      
+      // Update in chats list
+      const failedChats = chats.map(c =>
+        (c.sessionId || c.id) === sessionId ? failedChat : c
+      );
+      setChats(failedChats);
+      
+      // Show error temporarily
+      setTimeout(() => setError(''), 3000);
+    }
   };
 
   const handleLogout = () => {
@@ -271,7 +542,7 @@ export default function AdminDashboard() {
             filteredChats.map((chat) => (
               <div
                 key={chat.id}
-                className={`admin-chat-item ${selectedChat?.id === chat.id ? 'active' : ''}`}
+                className={`admin-chat-item ${(selectedChat?.sessionId || selectedChat?.id) === (chat.sessionId || chat.id) ? 'active' : ''}`}
                 onClick={() => handleChatClick(chat)}
               >
                 <div className="admin-chat-avatar">
@@ -303,6 +574,11 @@ export default function AdminDashboard() {
 
       {/* Active Chat Panel */}
       <div className="admin-active-chat-panel">
+        {error && (
+          <div className="admin-error-message">
+            {error}
+          </div>
+        )}
         {selectedChat ? (
           <>
             {/* Chat Header */}

@@ -1,0 +1,41 @@
+ADDITIONAL STEP REQUIRED: REST API CORS Configuration
+
+Your WebSocket CORS is fixed! ✅
+
+But you still need to add CORS for REST API endpoints (/api/**).
+
+Create this file:
+
+File: src/main/java/com/infinitevision/infinite_store/config/CorsConfig.java
+
+package com.infinitevision.infinite_store.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        // Allow CORS for all REST API endpoints
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("*")  // Or use .allowedOrigins("http://localhost:5173") for specific origin
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
+}
+
+After adding this:
+1. Restart your backend server
+2. Both WebSocket AND API calls will work!
+
+OPTIONAL: For better security, replace:
+    .allowedOriginPatterns("*")
+with:
+    .allowedOrigins("http://localhost:5173")
+to only allow your frontend origin.
+

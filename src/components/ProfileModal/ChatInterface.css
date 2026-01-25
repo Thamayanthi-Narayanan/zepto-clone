@@ -41,6 +41,19 @@
   color: #111827;
 }
 
+.chat-error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px 20px;
+  margin: 0 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #fecaca;
+  text-align: center;
+  flex-shrink: 0;
+}
+
 .chat-end-btn {
   background: transparent;
   border: none;
